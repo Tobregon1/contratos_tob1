@@ -727,7 +727,7 @@ function generateEmpeñoPDF(copyType) {
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...DARK);
   const prestLines = doc.splitTextToSize(
-    `Genesis Informatica, representada por Tobias Ezequiel Obregon, CUIT N° 20-43534626-0, con domicilio en Corrientes Capital, Provincia de Corrientes, Argentina; en adelante denominado "EL PRESTAMISTA";`,
+    `Genesis Informatica, representada por Tobias Ezequiel Obregón, CUIT N° 20-43534626-0, con domicilio en Corrientes Capital, Provincia de Corrientes, Argentina; en adelante denominado "EL PRESTAMISTA";`,
     CW - 4
   );
   doc.setFontSize(9.5);
@@ -780,15 +780,15 @@ function generateEmpeñoPDF(copyType) {
   if (marca || modelo) artDesc += `. Marca/Modelo: ${[marca, modelo].filter(Boolean).join(' / ')}`;
   if (color) artDesc += `. Color/Caracteristicas: ${color}`;
   addClause('PRIMERA', 'OBJETO DEL CONTRATO',
-    `El CLIENTE entrega voluntariamente al PRESTAMISTA, en calidad de empeño y como garantia del prestamo otorgado, el siguiente bien mueble:\n\n` +
+    `El CLIENTE entrega voluntariamente al PRESTAMISTA, en calidad de empeño y como garantia del prestamo otorgado, el siguiente bien:\n\n` +
     `Descripcion: ${artDesc}\n` +
     `Estado del articulo: ${estado || 'A determinar'}\n` +
     `Valor estimado por el PRESTAMISTA: ${formatCurrency(valor)}\n\n` +
-    `El CLIENTE declara ser el unico y legitimo propietario del bien descrito y que el mismo se encuentra libre de todo gravamen, embargo o reclamacion de terceros.`
+    `El CLIENTE declara ser el unico y legitimo propietario del bien descrito y que el mismo se encuentra libre de todo gravamen, embargo o reclamo de terceros.`
   );
 
   addClause('SEGUNDA', 'MONTO DEL PRESTAMO',
-    `El PRESTAMISTA otorga al CLIENTE en prestamo la suma de PESOS ${numberToWords(monto)} (${formatCurrency(monto)}), en concepto de prestamo garantizado con el articulo detallado en la Clausula Primera. El CLIENTE declara haber recibido dicha suma en efectivo y en conformidad.`
+    `El PRESTAMISTA otorga al CLIENTE en prestamo la suma de PESOS ${numberToWords(monto)} (${formatCurrency(monto)}), en concepto de prestamo garantizado con el articulo detallado en la Clausula Primera. El CLIENTE declara haber recibido dicha suma en efectivo/transferencia y en conformidad.`
   );
 
   addClause('TERCERA', 'PLAZO',
@@ -800,11 +800,11 @@ function generateEmpeñoPDF(copyType) {
   );
 
   addClause('QUINTA', 'RESCATE DEL ARTICULO',
-    `Para recuperar el bien empennado, el CLIENTE debera abonar la totalidad del monto indicado en la Clausula Cuarta (${formatCurrency(total)}) antes del vencimiento establecido el dia ${vencStr}. El pago debera efectuarse en las instalaciones del PRESTAMISTA, en efectivo o por el medio que las partes acuerden en ese momento.`
+    `Para recuperar el bien empeñado, el CLIENTE debera abonar la totalidad del monto indicado en la Clausula Cuarta (${formatCurrency(total)}) antes del vencimiento establecido el dia ${vencStr}. El pago debera efectuarse en las instalaciones del PRESTAMISTA, en efectivo o por el medio que las partes acuerden en ese momento.`
   );
 
   addClause('SEXTA', 'VENCIMIENTO E INCUMPLIMIENTO',
-    `En caso de no producirse el rescate del articulo antes de la fecha de vencimiento establecida, el CLIENTE perdera en forma definitiva e irrevocable el derecho sobre el bien empennado. El bien quedara en propiedad del PRESTAMISTA sin necesidad de notificacion previa, intimacion adicional, ni accion judicial alguna. El CLIENTE declara conocer y aceptar expresamente esta condicion al momento de la firma del presente contrato.`
+    `En caso de no producirse el rescate del articulo antes de la fecha de vencimiento establecida, el CLIENTE perdera en forma definitiva e irrevocable el derecho sobre el bien empeñado. El bien quedará en propiedad del PRESTAMISTA sin necesidad de notificacion previa, intimacion adicional, ni accion judicial alguna. El CLIENTE declara conocer y aceptar expresamente esta condicion al momento de la firma del presente contrato.`
   );
 
   addClause('SEPTIMA', 'CONDICIONES GENERALES',
