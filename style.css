@@ -21,8 +21,8 @@
   --c-muted:    #8080A0;
   --c-dim:      #505068;
 
-  --c-empeno:   #F59E0B;
-  --c-empeno-bg: rgba(245, 158, 11, 0.12);
+  --c-empeño:   #F59E0B;
+  --c-empeño-bg: rgba(245, 158, 11, 0.12);
   --c-servicio: #3B82F6;
   --c-servicio-bg: rgba(59, 130, 246, 0.12);
 
@@ -177,7 +177,7 @@ body {
   border-radius: var(--r-md); font-size: 28px;
   display: flex; align-items: center; justify-content: center;
 }
-.empeno-clr { background: var(--c-empeno-bg); box-shadow: 0 0 20px rgba(245,158,11,0.2); }
+.empeño-clr { background: var(--c-empeño-bg); box-shadow: 0 0 20px rgba(245,158,11,0.2); }
 .servicios-clr { background: var(--c-servicio-bg); box-shadow: 0 0 20px rgba(59,130,246,0.2); }
 
 .ccard-badge { text-align: right; }
@@ -238,7 +238,7 @@ body {
   font-size: 14px; font-weight: 700; padding: 4px 12px;
   border-radius: 20px;
 }
-.empeno-tag { background: var(--c-empeno-bg); color: var(--c-empeno); border: 1px solid rgba(245,158,11,0.3); }
+.empeño-tag { background: var(--c-empeño-bg); color: var(--c-empeño); border: 1px solid rgba(245,158,11,0.3); }
 .servicios-tag { background: var(--c-servicio-bg); color: var(--c-servicio); border: 1px solid rgba(59,130,246,0.3); }
 
 /* ─── PROGRESS BAR ───────────────────────────── */

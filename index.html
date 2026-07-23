@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Genesis Informatica — Contratos Digitales</title>
+  <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Sistema de generación de contratos digitales para Genesis Informatica — Empeño, Préstamo y Servicios Profesionales">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
@@ -41,12 +42,12 @@
 
         <div class="cards-grid">
 
-          <div class="ctype-card" id="card-empeno" onclick="navigate('empeno')">
+          <div class="ctype-card" id="card-empeño" onclick="navigate('empeño')">
             <div class="ccard-top">
-              <div class="ccard-icon empeno-clr">🏪</div>
+              <div class="ccard-icon empeño-clr">🏪</div>
               <div class="ccard-badge">
                 <span class="badge-label">Próximo contrato</span>
-                <span class="badge-num" id="badge-empeno">#001</span>
+                <span class="badge-num" id="badge-empeño">#001</span>
               </div>
             </div>
             <h2 class="ccard-title">Empeño / Préstamo</h2>
@@ -89,7 +90,7 @@
 
         <div class="stats-row">
           <div class="stat-item">
-            <div class="stat-num" id="stat-empeno">0</div>
+            <div class="stat-num" id="stat-empeño">0</div>
             <div class="stat-lbl">Empeños generados</div>
           </div>
           <div class="stat-sep"></div>
@@ -108,14 +109,14 @@
     </section>
 
     <!-- ═══ EMPEÑO VIEW ═══ -->
-    <section id="view-empeno" class="view">
+    <section id="view-empeño" class="view">
       <div class="form-container">
 
         <div class="form-topbar">
           <button class="back-btn" onclick="navigate('home')">← Inicio</button>
           <div class="form-title-wrap">
             <h2 class="form-title">Contrato de Empeño</h2>
-            <span class="form-num-tag empeno-tag" id="empeno-num-tag">#001</span>
+            <span class="form-num-tag empeño-tag" id="empeño-num-tag">#001</span>
           </div>
           <div style="width:90px"></div>
         </div>
@@ -146,7 +147,7 @@
           </div>
           <div class="step-nav">
             <button class="btn-outline" onclick="navigate('home')">Cancelar</button>
-            <button class="btn-primary" onclick="nextStep('empeno',1)">Siguiente →</button>
+            <button class="btn-primary" onclick="nextStep('empeño',1)">Siguiente →</button>
           </div>
         </div>
 
@@ -174,8 +175,8 @@
             <div class="fgroup"><label for="e-valor">Valor Estimado (ARS $) <span class="req">*</span></label><div class="input-money"><span>$</span><input type="number" id="e-valor" placeholder="0" min="0"></div></div>
           </div>
           <div class="step-nav">
-            <button class="btn-outline" onclick="prevStep('empeno',2)">← Anterior</button>
-            <button class="btn-primary" onclick="nextStep('empeno',2)">Siguiente →</button>
+            <button class="btn-outline" onclick="prevStep('empeño',2)">← Anterior</button>
+            <button class="btn-primary" onclick="nextStep('empeño',2)">Siguiente →</button>
           </div>
         </div>
 
@@ -186,10 +187,10 @@
             <p>Establecé los términos financieros del préstamo</p>
           </div>
           <div class="fgrid">
-            <div class="fgroup"><label for="e-monto">Monto del Préstamo (ARS $) <span class="req">*</span></label><div class="input-money"><span>$</span><input type="number" id="e-monto" placeholder="0" min="0" oninput="recalcularEmpeno()"></div></div>
-            <div class="fgroup"><label for="e-tasa">Tasa de Interés (%) <span class="req">*</span></label><div class="input-pct"><input type="number" id="e-tasa" placeholder="Ej: 20" min="0" step="0.5" oninput="recalcularEmpeno()"><span>%</span></div></div>
+            <div class="fgroup"><label for="e-monto">Monto del Préstamo (ARS $) <span class="req">*</span></label><div class="input-money"><span>$</span><input type="number" id="e-monto" placeholder="0" min="0" oninput="recalcularEmpeño()"></div></div>
+            <div class="fgroup"><label for="e-tasa">Tasa de Interés (%) <span class="req">*</span></label><div class="input-pct"><input type="number" id="e-tasa" placeholder="Ej: 20" min="0" step="0.5" oninput="recalcularEmpeño()"><span>%</span></div></div>
             <div class="fgroup"><label for="e-periodo">Período de Interés</label>
-              <select id="e-periodo" onchange="recalcularEmpeno()">
+              <select id="e-periodo" onchange="recalcularEmpeño()">
                 <option value="mensual">Mensual</option>
                 <option value="quincenal">Quincenal</option>
                 <option value="semanal">Semanal</option>
@@ -197,14 +198,14 @@
                 <option value="por el plazo acordado">Por el plazo acordado</option>
               </select>
             </div>
-            <div class="fgroup"><label for="e-plazo">Plazo (días) <span class="req">*</span></label><input type="number" id="e-plazo" placeholder="Ej: 30" min="1" oninput="recalcularEmpeno()"></div>
+            <div class="fgroup"><label for="e-plazo">Plazo (días) <span class="req">*</span></label><input type="number" id="e-plazo" placeholder="Ej: 30" min="1" oninput="recalcularEmpeño()"></div>
             <div class="fgroup"><label>Fecha de Vencimiento</label><div class="info-display" id="e-venc-display">—</div></div>
             <div class="fgroup"><label>Total a Devolver</label><div class="total-display" id="e-total-display">$ —</div></div>
             <div class="fgroup span2"><label for="e-obs">Observaciones / Condiciones adicionales</label><textarea id="e-obs" rows="3" placeholder="Notas especiales, condiciones adicionales..."></textarea></div>
           </div>
           <div class="step-nav">
-            <button class="btn-outline" onclick="prevStep('empeno',3)">← Anterior</button>
-            <button class="btn-primary" onclick="nextStep('empeno',3)">Siguiente →</button>
+            <button class="btn-outline" onclick="prevStep('empeño',3)">← Anterior</button>
+            <button class="btn-primary" onclick="nextStep('empeño',3)">Siguiente →</button>
           </div>
         </div>
 
@@ -217,33 +218,33 @@
 
           <div class="sig-wrap">
             <div class="sig-owner-label">Firma del Prestamista — Tobias Ezequiel Obregon</div>
-            <canvas id="sig-empeno" class="sig-canvas"></canvas>
-            <button class="btn-clear-sig" onclick="clearSignature('empeno')">🗑 Limpiar firma</button>
+            <canvas id="sig-empeño" class="sig-canvas"></canvas>
+            <button class="btn-clear-sig" onclick="clearSignature('empeño')">🗑 Limpiar firma</button>
           </div>
 
-          <div class="preview-card" id="empeno-preview-card">
+          <div class="preview-card" id="empeño-preview-card">
             <div class="preview-title">📋 Resumen del Contrato</div>
-            <div class="preview-grid" id="empeno-preview-content"></div>
+            <div class="preview-grid" id="empeño-preview-content"></div>
           </div>
 
           <div class="step-nav gen-nav">
-            <button class="btn-outline" onclick="prevStep('empeno',4)">← Anterior</button>
+            <button class="btn-outline" onclick="prevStep('empeño',4)">← Anterior</button>
             <div class="gen-group">
-              <button class="btn-gen btn-gen-client" onclick="generatePDF('empeno','cliente')">
+              <button class="btn-gen btn-gen-client" onclick="generatePDF('empeño','cliente')">
                 <span class="gen-ico">📄</span>
                 <div><div class="gen-lbl">PDF para el Cliente</div><div class="gen-sub">Copia ORIGINAL</div></div>
               </button>
-              <button class="btn-gen btn-gen-copy" onclick="generatePDF('empeno','copia')">
+              <button class="btn-gen btn-gen-copy" onclick="generatePDF('empeño','copia')">
                 <span class="gen-ico">📋</span>
                 <div><div class="gen-lbl">Mi Copia</div><div class="gen-sub">Copia del NEGOCIO</div></div>
               </button>
             </div>
           </div>
 
-          <div class="success-bar" id="empeno-success" style="display:none">
+          <div class="success-bar" id="empeño-success" style="display:none">
             <span>✅</span>
             <div><strong>¡PDF generado!</strong><br>Podés generar ambas copias con el mismo número de contrato.</div>
-            <button class="btn-new-contract" onclick="startNewContract('empeno')">+ Nuevo Contrato</button>
+            <button class="btn-new-contract" onclick="startNewContract('empeño')">+ Nuevo Contrato</button>
           </div>
         </div>
 
@@ -425,7 +426,7 @@
         <div class="settings-sec">
           <h4>Estadísticas</h4>
           <div class="settings-info">
-            <div class="info-row"><span>Contratos de Empeño generados:</span><strong id="cfg-empeno-cnt">0</strong></div>
+            <div class="info-row"><span>Contratos de Empeño generados:</span><strong id="cfg-empeño-cnt">0</strong></div>
             <div class="info-row"><span>Contratos de Servicios generados:</span><strong id="cfg-servicios-cnt">0</strong></div>
           </div>
         </div>
@@ -448,7 +449,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=3"></script>
 
 </body>
 </html>

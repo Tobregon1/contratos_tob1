@@ -8,7 +8,7 @@
 // ──────────────────────────────────────────────
 const App = {
   logo: null,
-  empeno: {
+  empeño: {
     step: 1,
     pad: null,
     contractNum: null,
@@ -53,8 +53,8 @@ function navigate(view) {
 
   if (view === 'home') {
     // Reset sessions when returning home
-    App.empeno.contractNum = null;
-    App.empeno.numSaved = false;
+    App.empeño.contractNum = null;
+    App.empeño.numSaved = false;
     App.servicios.contractNum = null;
     App.servicios.numSaved = false;
     updateStats();
@@ -62,18 +62,18 @@ function navigate(view) {
     return;
   }
 
-  if (view === 'empeno') {
+  if (view === 'empeño') {
     // Assign contract number for this session
-    App.empeno.contractNum = getNextNum('empeno');
-    App.empeno.numSaved = false;
-    App.empeno.step = 1;
+    App.empeño.contractNum = getNextNum('empeño');
+    App.empeño.numSaved = false;
+    App.empeño.step = 1;
     // Reset form steps
-    showStep('empeno', 1);
-    updateProgress('empeno', 1);
-    document.getElementById('empeno-num-tag').textContent = '#' + padNum(App.empeno.contractNum, 3);
-    document.getElementById('empeno-success').style.display = 'none';
+    showStep('empeño', 1);
+    updateProgress('empeño', 1);
+    document.getElementById('empeño-num-tag').textContent = '#' + padNum(App.empeño.contractNum, 3);
+    document.getElementById('empeño-success').style.display = 'none';
     // Reset form
-    resetForm('empeno');
+    resetForm('empeño');
   }
 
   if (view === 'servicios') {
@@ -95,7 +95,7 @@ function navigate(view) {
 }
 
 function resetForm(type) {
-  if (type === 'empeno') {
+  if (type === 'empeño') {
     const ids = ['e-nombre','e-apellido','e-dni','e-telefono','e-direccion',
                  'e-articulo','e-marca','e-modelo','e-color','e-valor',
                  'e-monto','e-tasa','e-plazo','e-obs'];
@@ -131,7 +131,7 @@ function nextStep(type, current) {
   showStep(type, next);
   updateProgress(type, next);
 
-  if (type === 'empeno') App.empeno.step = next;
+  if (type === 'empeño') App.empeño.step = next;
   if (type === 'servicios') App.servicios.step = next;
 
   // Init signature pad when reaching step 4
@@ -151,14 +151,14 @@ function prevStep(type, current) {
 
   showStep(type, prev);
   updateProgress(type, prev);
-  if (type === 'empeno') App.empeno.step = prev;
+  if (type === 'empeño') App.empeño.step = prev;
   if (type === 'servicios') App.servicios.step = prev;
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function showStep(type, step) {
-  const prefix = type === 'empeno' ? 'e' : 's';
+  const prefix = type === 'empeño' ? 'e' : 's';
   for (let i = 1; i <= 4; i++) {
     const el = document.getElementById(`${prefix}step-${i}`);
     if (el) el.classList.toggle('active', i === step);
@@ -166,7 +166,7 @@ function showStep(type, step) {
 }
 
 function updateProgress(type, activeStep) {
-  const prefix = type === 'empeno' ? 'e' : 's';
+  const prefix = type === 'empeño' ? 'e' : 's';
   for (let i = 1; i <= 4; i++) {
     const stepEl = document.getElementById(`prog-${prefix}-${i}`);
     if (stepEl) {
@@ -184,7 +184,7 @@ function updateProgress(type, activeStep) {
 // VALIDATION
 // ──────────────────────────────────────────────
 function validateStep(type, step) {
-  if (type === 'empeno') {
+  if (type === 'empeño') {
     if (step === 1) {
       if (!val('e-nombre'))    { shakeField('e-nombre');   showToast('Ingresá el nombre del cliente', 'error'); return false; }
       if (!val('e-apellido'))  { shakeField('e-apellido'); showToast('Ingresá el apellido del cliente', 'error'); return false; }
@@ -244,7 +244,7 @@ function shakeField(id) {
 // ──────────────────────────────────────────────
 // FORM LOGIC
 // ──────────────────────────────────────────────
-function recalcularEmpeno() {
+function recalcularEmpeño() {
   const monto = parseFloat(document.getElementById('e-monto').value) || 0;
   const tasa  = parseFloat(document.getElementById('e-tasa').value) || 0;
   const plazo = parseInt(document.getElementById('e-plazo').value) || 0;
@@ -301,12 +301,12 @@ function initSignaturePad(type) {
     maxWidth: 3.5,
   });
 
-  if (type === 'empeno')   App.empeno.pad = pad;
+  if (type === 'empeño')   App.empeño.pad = pad;
   if (type === 'servicios') App.servicios.pad = pad;
 }
 
 function clearSignature(type) {
-  const pad = type === 'empeno' ? App.empeno.pad : App.servicios.pad;
+  const pad = type === 'empeño' ? App.empeño.pad : App.servicios.pad;
   if (pad) pad.clear();
 }
 
@@ -314,7 +314,7 @@ function clearSignature(type) {
 // PREVIEW
 // ──────────────────────────────────────────────
 function updatePreview(type) {
-  if (type === 'empeno') {
+  if (type === 'empeño') {
     const monto = parseFloat(document.getElementById('e-monto').value) || 0;
     const tasa  = parseFloat(document.getElementById('e-tasa').value) || 0;
     const total = monto + monto * (tasa / 100);
@@ -341,7 +341,7 @@ function updatePreview(type) {
       { l: 'Total a devolver', v: formatCurrency(total), highlight: true },
     ];
 
-    renderPreview('empeno-preview-content', items);
+    renderPreview('empeño-preview-content', items);
   }
 
   if (type === 'servicios') {
@@ -449,17 +449,17 @@ function numberToWords(n) {
 // STATS & BADGES
 // ──────────────────────────────────────────────
 function updateStats() {
-  const en = parseInt(localStorage.getItem('empeno_num') || '0');
+  const en = parseInt(localStorage.getItem('empeño_num') || '0');
   const sn = parseInt(localStorage.getItem('servicios_num') || '0');
-  document.getElementById('stat-empeno').textContent   = en;
+  document.getElementById('stat-empeño').textContent   = en;
   document.getElementById('stat-servicios').textContent = sn;
   document.getElementById('stat-total').textContent    = en + sn;
 }
 
 function updateBadges() {
-  const en = getNextNum('empeno');
+  const en = getNextNum('empeño');
   const sn = getNextNum('servicios');
-  document.getElementById('badge-empeno').textContent   = '#' + padNum(en, 3);
+  document.getElementById('badge-empeño').textContent   = '#' + padNum(en, 3);
   document.getElementById('badge-servicios').textContent = '#' + padNum(sn, 3);
 }
 
@@ -522,9 +522,9 @@ function removeLogo() {
 // SETTINGS MODAL
 // ──────────────────────────────────────────────
 function openSettings() {
-  const en = parseInt(localStorage.getItem('empeno_num') || '0');
+  const en = parseInt(localStorage.getItem('empeño_num') || '0');
   const sn = parseInt(localStorage.getItem('servicios_num') || '0');
-  document.getElementById('cfg-empeno-cnt').textContent   = en;
+  document.getElementById('cfg-empeño-cnt').textContent   = en;
   document.getElementById('cfg-servicios-cnt').textContent = sn;
 
   // Refresh logo preview in modal
@@ -555,11 +555,11 @@ document.addEventListener('click', (e) => {
 
 function resetCounters() {
   if (!confirm('¿Reiniciar la numeración al #001? Esta acción no borra los contratos existentes.')) return;
-  localStorage.setItem('empeno_num', '0');
+  localStorage.setItem('empeño_num', '0');
   localStorage.setItem('servicios_num', '0');
   updateStats();
   updateBadges();
-  document.getElementById('cfg-empeno-cnt').textContent = '0';
+  document.getElementById('cfg-empeño-cnt').textContent = '0';
   document.getElementById('cfg-servicios-cnt').textContent = '0';
   showToast('Numeración reiniciada al #001 ✓', 'success');
 }
@@ -576,22 +576,22 @@ function startNewContract(type) {
 // PDF GENERATION — EMPEÑO
 // ──────────────────────────────────────────────
 function generatePDF(type, copyType) {
-  if (type === 'empeno')   generateEmpenoPDF(copyType);
+  if (type === 'empeño')   generateEmpeñoPDF(copyType);
   if (type === 'servicios') generateServiciosPDF(copyType);
 }
 
-function generateEmpenoPDF(copyType) {
+function generateEmpeñoPDF(copyType) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
 
   // Save contract number on first generation
-  if (!App.empeno.numSaved) {
-    saveNum('empeno', App.empeno.contractNum);
-    App.empeno.numSaved = true;
+  if (!App.empeño.numSaved) {
+    saveNum('empeño', App.empeño.contractNum);
+    App.empeño.numSaved = true;
   }
 
   // Collect data
-  const num    = padNum(App.empeno.contractNum, 4);
+  const num    = padNum(App.empeño.contractNum, 4);
   const nombre = `${g('e-nombre')} ${g('e-apellido')}`;
   const dni    = g('e-dni');
   const tel    = g('e-telefono');
@@ -622,8 +622,8 @@ function generateEmpenoPDF(copyType) {
 
   // Signature
   let sigData = null;
-  if (App.empeno.pad && !App.empeno.pad.isEmpty()) {
-    sigData = App.empeno.pad.toDataURL('image/png');
+  if (App.empeño.pad && !App.empeño.pad.isEmpty()) {
+    sigData = App.empeño.pad.toDataURL('image/png');
   }
 
   // ── PDF LAYOUT ──
@@ -654,7 +654,7 @@ function generateEmpenoPDF(copyType) {
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...LGRAY);
-    doc.text(`Contrato de Empeno N° ${num} — Genesis Informatica — Corrientes Capital, Argentina`, PW / 2, PH - 8, { align: 'center' });
+    doc.text(`Contrato de Empeño N° ${num} — Genesis Informatica — Corrientes Capital, Argentina`, PW / 2, PH - 8, { align: 'center' });
     line(M, PH - 12, PW - M, PH - 12);
   }
 
@@ -686,7 +686,7 @@ function generateEmpenoPDF(copyType) {
   // Copy type badge
   const isCliente = copyType === 'cliente';
   const badgeColor = isCliente ? [34, 197, 94] : [59, 130, 246];
-  const badgeText  = isCliente ? 'ORIGINAL — CLIENTE' : 'COPIA — MI NEGOCIO';
+  const badgeText  = isCliente ? 'ORIGINAL' : 'COPIA';
   doc.setFillColor(...badgeColor);
   doc.roundedRect(M, y, 58, 8, 2, 2, 'F');
   doc.setTextColor(255, 255, 255);
@@ -705,7 +705,7 @@ function generateEmpenoPDF(copyType) {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
   doc.setTextColor(...DARK);
-  doc.text(`CONTRATO DE EMPENO N° ${num}`, PW / 2, y, { align: 'center' });
+  doc.text(`CONTRATO DE EMPEÑO N° ${num}`, PW / 2, y, { align: 'center' });
   y += 5;
   line(M, y, PW - M, y);
   y += 6;
@@ -735,11 +735,6 @@ function generateEmpenoPDF(copyType) {
   doc.text(prestLines, M + 4, y);
   y += prestLines.length * 5 + 4;
 
-  doc.setFont('helvetica', 'italic');
-  doc.setFontSize(9);
-  doc.text('y', M, y);
-  y += 5;
-
   // Prestatario block
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9.5);
@@ -757,7 +752,7 @@ function generateEmpenoPDF(copyType) {
   y += clientLines.length * 5 + 4;
 
   const acuerdoLines = doc.splitTextToSize(
-    `Se conviene el presente CONTRATO DE EMPENO sujeto a las siguientes clausulas y condiciones:`, CW
+    `Se conviene el presente CONTRATO DE EMPEÑO sujeto a las siguientes clausulas y condiciones:`, CW
   );
   doc.setFontSize(9.5);
   doc.text(acuerdoLines, M, y);
@@ -775,8 +770,9 @@ function generateEmpenoPDF(copyType) {
     doc.setTextColor(...DARK);
     const lines = doc.splitTextToSize(content, CW - 2);
     doc.text(lines, M + 2, y);
-    y += lines.length * 5 + 5;
-    line(M, y - 2, PW - M, y - 2, LGRAY, 0.2);
+    y += lines.length * 5 + 4;
+    line(M, y, PW - M, y, LGRAY, 0.2);
+    y += 6;
   }
 
   // Clause 1 — Artículo
@@ -784,7 +780,7 @@ function generateEmpenoPDF(copyType) {
   if (marca || modelo) artDesc += `. Marca/Modelo: ${[marca, modelo].filter(Boolean).join(' / ')}`;
   if (color) artDesc += `. Color/Caracteristicas: ${color}`;
   addClause('PRIMERA', 'OBJETO DEL CONTRATO',
-    `El CLIENTE entrega voluntariamente al PRESTAMISTA, en calidad de empeno y como garantia del prestamo otorgado, el siguiente bien mueble:\n\n` +
+    `El CLIENTE entrega voluntariamente al PRESTAMISTA, en calidad de empeño y como garantia del prestamo otorgado, el siguiente bien mueble:\n\n` +
     `Descripcion: ${artDesc}\n` +
     `Estado del articulo: ${estado || 'A determinar'}\n` +
     `Valor estimado por el PRESTAMISTA: ${formatCurrency(valor)}\n\n` +
@@ -812,7 +808,7 @@ function generateEmpenoPDF(copyType) {
   );
 
   addClause('SEPTIMA', 'CONDICIONES GENERALES',
-    `El CLIENTE garantiza que el bien entregado en empeno no es producto de delito y que es su legitimo propietario. Las partes renuncian a cualquier fuero que pudiera corresponderles sometiendose a la jurisdiccion de los Tribunales Ordinarios de la ciudad de Corrientes, Argentina.` +
+    `El CLIENTE garantiza que el bien entregado en empeño no es producto de delito y que es su legitimo propietario. Las partes renuncian a cualquier fuero que pudiera corresponderles sometiendose a la jurisdiccion de los Tribunales Ordinarios de la ciudad de Corrientes, Argentina.` +
     (obs ? `\n\nOBSERVACIONES: ${obs}` : '')
   );
 
@@ -892,9 +888,9 @@ function generateEmpenoPDF(copyType) {
   // Save
   const label = isCliente ? 'CLIENTE' : 'NEGOCIO';
   const apellido = g('e-apellido').replace(/\s+/g, '_') || 'SinApellido';
-  savePDF(doc, `Empeno_${num}_${apellido}_${label}.pdf`);
+  savePDF(doc, `Empeño_${num}_${apellido}_${label}.pdf`);
 
-  showSuccess('empeno');
+  showSuccess('empeño');
   showToast('¡PDF generado correctamente!', 'success');
 }
 
@@ -987,7 +983,7 @@ function generateServiciosPDF(copyType) {
 
   const isCliente = copyType === 'cliente';
   const badgeColor = isCliente ? [34, 197, 94] : [59, 130, 246];
-  const badgeText  = isCliente ? 'ORIGINAL — CLIENTE' : 'COPIA — MI NEGOCIO';
+  const badgeText  = isCliente ? 'ORIGINAL' : 'COPIA';
   doc.setFillColor(...badgeColor);
   doc.roundedRect(M, y, 58, 8, 2, 2, 'F');
   doc.setTextColor(255, 255, 255);
@@ -1037,10 +1033,7 @@ function generateServiciosPDF(copyType) {
   doc.text(prestLines, M + 4, y);
   y += prestLines.length * 5 + 4;
 
-  doc.setFont('helvetica', 'italic');
-  doc.setFontSize(9);
-  doc.text('y', M, y);
-  y += 5;
+
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9.5);
@@ -1074,8 +1067,9 @@ function generateServiciosPDF(copyType) {
     doc.setTextColor(...DARK);
     const lines = doc.splitTextToSize(content, CW - 2);
     doc.text(lines, M + 2, y);
-    y += lines.length * 5 + 5;
-    line(M, y - 2, PW - M, y - 2, LGRAY, 0.2);
+    y += lines.length * 5 + 4;
+    line(M, y, PW - M, y, LGRAY, 0.2);
+    y += 6;
   }
 
   addClause('PRIMERA', 'OBJETO DEL CONTRATO',
