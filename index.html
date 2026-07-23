@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Genesis Informatica — Contratos Digitales</title>
+  <meta name="description" content="Sistema de generación de contratos digitales para Genesis Informatica — Empeño, Préstamo y Servicios Profesionales">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header id="app-header">
+    <div class="header-inner">
+        <div class="header-brand" onclick="navigate('home')">
+          <div class="header-brand-text">
+            <span class="brand-name">Genesis Informatica</span>
+            <span class="brand-tag">Contratos Digitales</span>
+          </div>
+        </div>
+      <div class="header-actions">
+        <button class="hdr-btn" onclick="openSettings()" title="Configuración">⚙</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="app-main">
+
+    <!-- ═══ HOME VIEW ═══ -->
+    <section id="view-home" class="view active">
+      <div class="home-wrap">
+
+        <div class="home-hero">
+          <div class="hero-logo-area">
+            <img id="home-logo" class="hero-logo" src="" alt="" style="display:none">
+          </div>
+          <h1 class="hero-title">Contratos Digitales</h1>
+          <p class="hero-sub">Generá contratos profesionales en PDF de forma rápida y sencilla</p>
+        </div>
+
+        <div class="cards-grid">
+
+          <div class="ctype-card" id="card-empeno" onclick="navigate('empeno')">
+            <div class="ccard-top">
+              <div class="ccard-icon empeno-clr">🏪</div>
+              <div class="ccard-badge">
+                <span class="badge-label">Próximo contrato</span>
+                <span class="badge-num" id="badge-empeno">#001</span>
+              </div>
+            </div>
+            <h2 class="ccard-title">Empeño / Préstamo</h2>
+            <p class="ccard-desc">Contratos de empeño con artículo en garantía, monto, intereses y vencimiento.</p>
+            <ul class="ccard-list">
+              <li>Datos del cliente y artículo</li>
+              <li>Monto, tasa e intereses</li>
+              <li>Fecha de rescate y condiciones</li>
+              <li>2 copias PDF (cliente + negocio)</li>
+            </ul>
+            <div class="ccard-action">
+              <span>Nuevo Contrato</span>
+              <span class="ccard-arrow">→</span>
+            </div>
+          </div>
+
+          <div class="ctype-card" id="card-servicios" onclick="navigate('servicios')">
+            <div class="ccard-top">
+              <div class="ccard-icon servicios-clr">💻</div>
+              <div class="ccard-badge">
+                <span class="badge-label">Próximo contrato</span>
+                <span class="badge-num" id="badge-servicios">#001</span>
+              </div>
+            </div>
+            <h2 class="ccard-title">Servicios Profesionales</h2>
+            <p class="ccard-desc">Programación, marketing, servicio técnico de PC e impresoras.</p>
+            <ul class="ccard-list">
+              <li>Tipo y descripción del servicio</li>
+              <li>Precio, anticipo y forma de pago</li>
+              <li>Plazos de entrega y garantía</li>
+              <li>2 copias PDF (cliente + negocio)</li>
+            </ul>
+            <div class="ccard-action">
+              <span>Nuevo Contrato</span>
+              <span class="ccard-arrow">→</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-item">
+            <div class="stat-num" id="stat-empeno">0</div>
+            <div class="stat-lbl">Empeños generados</div>
+          </div>
+          <div class="stat-sep"></div>
+          <div class="stat-item">
+            <div class="stat-num" id="stat-servicios">0</div>
+            <div class="stat-lbl">Servicios generados</div>
+          </div>
+          <div class="stat-sep"></div>
+          <div class="stat-item">
+            <div class="stat-num" id="stat-total">0</div>
+            <div class="stat-lbl">Total contratos</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══ EMPEÑO VIEW ═══ -->
+    <section id="view-empeno" class="view">
+      <div class="form-container">
+
+        <div class="form-topbar">
+          <button class="back-btn" onclick="navigate('home')">← Inicio</button>
+          <div class="form-title-wrap">
+            <h2 class="form-title">Contrato de Empeño</h2>
+            <span class="form-num-tag empeno-tag" id="empeno-num-tag">#001</span>
+          </div>
+          <div style="width:90px"></div>
+        </div>
+
+        <div class="prog-bar-wrap">
+          <div class="prog-step active" id="prog-e-1"><div class="prog-circ">1</div><div class="prog-lbl">Cliente</div></div>
+          <div class="prog-line" id="pline-e-1"></div>
+          <div class="prog-step" id="prog-e-2"><div class="prog-circ">2</div><div class="prog-lbl">Artículo</div></div>
+          <div class="prog-line" id="pline-e-2"></div>
+          <div class="prog-step" id="prog-e-3"><div class="prog-circ">3</div><div class="prog-lbl">Préstamo</div></div>
+          <div class="prog-line" id="pline-e-3"></div>
+          <div class="prog-step" id="prog-e-4"><div class="prog-circ">4</div><div class="prog-lbl">Firma</div></div>
+        </div>
+
+        <!-- E-Step 1: Cliente -->
+        <div class="fstep active" id="estep-1">
+          <div class="step-hdr">
+            <h3>👤 Datos del Cliente</h3>
+            <p>Completá los datos de identificación del cliente</p>
+          </div>
+          <div class="fgrid">
+            <div class="fgroup"><label for="e-nombre">Nombre <span class="req">*</span></label><input type="text" id="e-nombre" placeholder="Nombre"></div>
+            <div class="fgroup"><label for="e-apellido">Apellido <span class="req">*</span></label><input type="text" id="e-apellido" placeholder="Apellido"></div>
+            <div class="fgroup"><label for="e-dni">DNI <span class="req">*</span></label><input type="text" id="e-dni" placeholder="Número de DNI"></div>
+            <div class="fgroup"><label for="e-telefono">Teléfono</label><input type="tel" id="e-telefono" placeholder="Ej: 3794-123456"></div>
+            <div class="fgroup span2"><label for="e-direccion">Domicilio <span class="req">*</span></label><input type="text" id="e-direccion" placeholder="Dirección completa del cliente"></div>
+            <div class="fgroup"><label for="e-fecha">Fecha del Contrato <span class="req">*</span></label><input type="date" id="e-fecha"></div>
+          </div>
+          <div class="step-nav">
+            <button class="btn-outline" onclick="navigate('home')">Cancelar</button>
+            <button class="btn-primary" onclick="nextStep('empeno',1)">Siguiente →</button>
+          </div>
+        </div>
+
+        <!-- E-Step 2: Artículo -->
+        <div class="fstep" id="estep-2">
+          <div class="step-hdr">
+            <h3>📦 Artículo en Empeño</h3>
+            <p>Describí el artículo que se entrega como garantía</p>
+          </div>
+          <div class="fgrid">
+            <div class="fgroup span2"><label for="e-articulo">Descripción del Artículo <span class="req">*</span></label><textarea id="e-articulo" rows="3" placeholder="Descripción detallada del artículo (tipo, características, etc.)"></textarea></div>
+            <div class="fgroup"><label for="e-marca">Marca</label><input type="text" id="e-marca" placeholder="Ej: Samsung, HP, Apple..."></div>
+            <div class="fgroup"><label for="e-modelo">Modelo / N° de Serie</label><input type="text" id="e-modelo" placeholder="Modelo o número de serie"></div>
+            <div class="fgroup"><label for="e-color">Color / Características</label><input type="text" id="e-color" placeholder="Color u otras características visibles"></div>
+            <div class="fgroup"><label for="e-estado">Estado <span class="req">*</span></label>
+              <select id="e-estado">
+                <option value="">Seleccionar...</option>
+                <option value="Excelente">Excelente</option>
+                <option value="Muy bueno">Muy bueno</option>
+                <option value="Bueno">Bueno</option>
+                <option value="Regular">Regular</option>
+                <option value="Con desperfectos">Con desperfectos</option>
+              </select>
+            </div>
+            <div class="fgroup"><label for="e-valor">Valor Estimado (ARS $) <span class="req">*</span></label><div class="input-money"><span>$</span><input type="number" id="e-valor" placeholder="0" min="0"></div></div>
+          </div>
+          <div class="step-nav">
+            <button class="btn-outline" onclick="prevStep('empeno',2)">← Anterior</button>
+            <button class="btn-primary" onclick="nextStep('empeno',2)">Siguiente →</button>
+          </div>
+        </div>
+
+        <!-- E-Step 3: Préstamo -->
+        <div class="fstep" id="estep-3">
+          <div class="step-hdr">
+            <h3>💰 Condiciones del Préstamo</h3>
+            <p>Establecé los términos financieros del préstamo</p>
+          </div>
+          <div class="fgrid">
+            <div class="fgroup"><label for="e-monto">Monto del Préstamo (ARS $) <span class="req">*</span></label><div class="input-money"><span>$</span><input type="number" id="e-monto" placeholder="0" min="0" oninput="recalcularEmpeno()"></div></div>
+            <div class="fgroup"><label for="e-tasa">Tasa de Interés (%) <span class="req">*</span></label><div class="input-pct"><input type="number" id="e-tasa" placeholder="Ej: 20" min="0" step="0.5" oninput="recalcularEmpeno()"><span>%</span></div></div>
+            <div class="fgroup"><label for="e-periodo">Período de Interés</label>
+              <select id="e-periodo" onchange="recalcularEmpeno()">
+                <option value="mensual">Mensual</option>
+                <option value="quincenal">Quincenal</option>
+                <option value="semanal">Semanal</option>
+                <option value="diario">Diario</option>
+                <option value="por el plazo acordado">Por el plazo acordado</option>
+              </select>
+            </div>
+            <div class="fgroup"><label for="e-plazo">Plazo (días) <span class="req">*</span></label><input type="number" id="e-plazo" placeholder="Ej: 30" min="1" oninput="recalcularEmpeno()"></div>
+            <div class="fgroup"><label>Fecha de Vencimiento</label><div class="info-display" id="e-venc-display">—</div></div>
+            <div class="fgroup"><label>Total a Devolver</label><div class="total-display" id="e-total-display">$ —</div></div>
+            <div class="fgroup span2"><label for="e-obs">Observaciones / Condiciones adicionales</label><textarea id="e-obs" rows="3" placeholder="Notas especiales, condiciones adicionales..."></textarea></div>
+          </div>
+          <div class="step-nav">
+            <button class="btn-outline" onclick="prevStep('empeno',3)">← Anterior</button>
+            <button class="btn-primary" onclick="nextStep('empeno',3)">Siguiente →</button>
+          </div>
+        </div>
+
+        <!-- E-Step 4: Firma -->
+        <div class="fstep" id="estep-4">
+          <div class="step-hdr">
+            <h3>✍️ Firma Digital</h3>
+            <p>Firmá en el recuadro (el cliente firmará a mano en el documento impreso)</p>
+          </div>
+
+          <div class="sig-wrap">
+            <div class="sig-owner-label">Firma del Prestamista — Tobias Ezequiel Obregon</div>
+            <canvas id="sig-empeno" class="sig-canvas"></canvas>
+            <button class="btn-clear-sig" onclick="clearSignature('empeno')">🗑 Limpiar firma</button>
+          </div>
+
+          <div class="preview-card" id="empeno-preview-card">
+            <div class="preview-title">📋 Resumen del Contrato</div>
+            <div class="preview-grid" id="empeno-preview-content"></div>
+          </div>
+
+          <div class="step-nav gen-nav">
+            <button class="btn-outline" onclick="prevStep('empeno',4)">← Anterior</button>
+            <div class="gen-group">
+              <button class="btn-gen btn-gen-client" onclick="generatePDF('empeno','cliente')">
+                <span class="gen-ico">📄</span>
+                <div><div class="gen-lbl">PDF para el Cliente</div><div class="gen-sub">Copia ORIGINAL</div></div>
+              </button>
+              <button class="btn-gen btn-gen-copy" onclick="generatePDF('empeno','copia')">
+                <span class="gen-ico">📋</span>
+                <div><div class="gen-lbl">Mi Copia</div><div class="gen-sub">Copia del NEGOCIO</div></div>
+              </button>
+            </div>
+          </div>
+
+          <div class="success-bar" id="empeno-success" style="display:none">
+            <span>✅</span>
+            <div><strong>¡PDF generado!</strong><br>Podés generar ambas copias con el mismo número de contrato.</div>
+            <button class="btn-new-contract" onclick="startNewContract('empeno')">+ Nuevo Contrato</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══ SERVICIOS VIEW ═══ -->
+    <section id="view-servicios" class="view">
+      <div class="form-container">
+
+        <div class="form-topbar">
+          <button class="back-btn" onclick="navigate('home')">← Inicio</button>
+          <div class="form-title-wrap">
+            <h2 class="form-title">Contrato de Servicios</h2>
+            <span class="form-num-tag servicios-tag" id="servicios-num-tag">#001</span>
+          </div>
+          <div style="width:90px"></div>
+        </div>
+
+        <div class="prog-bar-wrap">
+          <div class="prog-step active" id="prog-s-1"><div class="prog-circ">1</div><div class="prog-lbl">Cliente</div></div>
+          <div class="prog-line" id="pline-s-1"></div>
+          <div class="prog-step" id="prog-s-2"><div class="prog-circ">2</div><div class="prog-lbl">Servicio</div></div>
+          <div class="prog-line" id="pline-s-2"></div>
+          <div class="prog-step" id="prog-s-3"><div class="prog-circ">3</div><div class="prog-lbl">Condiciones</div></div>
+          <div class="prog-line" id="pline-s-3"></div>
+          <div class="prog-step" id="prog-s-4"><div class="prog-circ">4</div><div class="prog-lbl">Firma</div></div>
+        </div>
+
+        <!-- S-Step 1: Cliente -->
+        <div class="fstep active" id="sstep-1">
+          <div class="step-hdr">
+            <h3>👤 Datos del Cliente</h3>
+            <p>Completá los datos de identificación del cliente</p>
+          </div>
+          <div class="fgrid">
+            <div class="fgroup"><label for="s-nombre">Nombre <span class="req">*</span></label><input type="text" id="s-nombre" placeholder="Nombre"></div>
+            <div class="fgroup"><label for="s-apellido">Apellido <span class="req">*</span></label><input type="text" id="s-apellido" placeholder="Apellido"></div>
+            <div class="fgroup"><label for="s-dni">DNI / CUIT <span class="req">*</span></label><input type="text" id="s-dni" placeholder="Número de DNI o CUIT"></div>
+            <div class="fgroup"><label for="s-telefono">Teléfono</label><input type="tel" id="s-telefono" placeholder="Ej: 3794-123456"></div>
+            <div class="fgroup"><label for="s-email">Email</label><input type="email" id="s-email" placeholder="correo@ejemplo.com"></div>
+            <div class="fgroup"><label for="s-fecha">Fecha del Contrato <span class="req">*</span></label><input type="date" id="s-fecha"></div>
+            <div class="fgroup span2"><label for="s-direccion">Domicilio</label><input type="text" id="s-direccion" placeholder="Dirección del cliente"></div>
+          </div>
+          <div class="step-nav">
+            <button class="btn-outline" onclick="navigate('home')">Cancelar</button>
+            <button class="btn-primary" onclick="nextStep('servicios',1)">Siguiente →</button>
+          </div>
+        </div>
+
+        <!-- S-Step 2: Servicio -->
+        <div class="fstep" id="sstep-2">
+          <div class="step-hdr">
+            <h3>🔧 Tipo y Descripción del Servicio</h3>
+            <p>Seleccioná el tipo de servicio y describilo en detalle</p>
+          </div>
+          <div class="fgrid">
+            <div class="fgroup span2">
+              <label>Tipo de Servicio <span class="req">*</span></label>
+              <div class="stype-grid">
+                <div class="stype-card" id="stype-programacion" onclick="selectServiceType('programacion','Programacion')">
+                  <div class="stype-emoji">💻</div>
+                  <span>Programación</span>
+                </div>
+                <div class="stype-card" id="stype-marketing" onclick="selectServiceType('marketing','Marketing')">
+                  <div class="stype-emoji">📢</div>
+                  <span>Marketing</span>
+                </div>
+                <div class="stype-card" id="stype-tecnico" onclick="selectServiceType('tecnico','Servicio Tecnico de PC e Impresoras')">
+                  <div class="stype-emoji">🔧</div>
+                  <span>Técnico PC / Impresoras</span>
+                </div>
+              </div>
+              <input type="hidden" id="s-tipo" value="">
+              <input type="hidden" id="s-tipo-label" value="">
+            </div>
+            <div class="fgroup span2"><label for="s-descripcion">Descripción detallada del servicio <span class="req">*</span></label><textarea id="s-descripcion" rows="4" placeholder="Describí en detalle qué trabajo se realizará..."></textarea></div>
+            <div class="fgroup span2"><label for="s-entregables">Entregables / Alcance del servicio</label><textarea id="s-entregables" rows="3" placeholder="¿Qué se entregará al cliente? ¿Qué incluye el servicio?"></textarea></div>
+          </div>
+          <div class="step-nav">
+            <button class="btn-outline" onclick="prevStep('servicios',2)">← Anterior</button>
+            <button class="btn-primary" onclick="nextStep('servicios',2)">Siguiente →</button>
+          </div>
+        </div>
+
+        <!-- S-Step 3: Condiciones -->
+        <div class="fstep" id="sstep-3">
+          <div class="step-hdr">
+            <h3>💰 Condiciones Económicas y Plazos</h3>
+            <p>Definí precio, pagos, plazos y garantía del servicio</p>
+          </div>
+          <div class="fgrid">
+            <div class="fgroup"><label for="s-precio">Precio Total (ARS $) <span class="req">*</span></label><div class="input-money"><span>$</span><input type="number" id="s-precio" placeholder="0" min="0"></div></div>
+            <div class="fgroup"><label for="s-sena">Seña / Anticipo (ARS $)</label><div class="input-money"><span>$</span><input type="number" id="s-sena" placeholder="0" min="0"></div></div>
+            <div class="fgroup span2"><label for="s-forma-pago">Forma de Pago <span class="req">*</span></label>
+              <select id="s-forma-pago">
+                <option value="">Seleccionar...</option>
+                <option value="Efectivo">Efectivo</option>
+                <option value="Transferencia bancaria">Transferencia bancaria</option>
+                <option value="Efectivo y transferencia">Efectivo y transferencia</option>
+                <option value="En cuotas">En cuotas</option>
+                <option value="50% anticipo, 50% al finalizar">50% anticipo, 50% al finalizar</option>
+                <option value="A convenir entre las partes">A convenir entre las partes</option>
+              </select>
+            </div>
+            <div class="fgroup"><label for="s-plazo">Plazo de Entrega</label><input type="text" id="s-plazo" placeholder="Ej: 15 dias habiles"></div>
+            <div class="fgroup"><label for="s-fecha-entrega">Fecha estimada de entrega</label><input type="date" id="s-fecha-entrega"></div>
+            <div class="fgroup span2"><label for="s-garantia">Garantía del servicio</label><input type="text" id="s-garantia" placeholder="Ej: 30 dias de garantia sobre los trabajos realizados"></div>
+            <div class="fgroup span2"><label for="s-condiciones">Condiciones y observaciones adicionales</label><textarea id="s-condiciones" rows="3" placeholder="Condiciones especiales, excepciones, notas importantes..."></textarea></div>
+          </div>
+          <div class="step-nav">
+            <button class="btn-outline" onclick="prevStep('servicios',3)">← Anterior</button>
+            <button class="btn-primary" onclick="nextStep('servicios',3)">Siguiente →</button>
+          </div>
+        </div>
+
+        <!-- S-Step 4: Firma -->
+        <div class="fstep" id="sstep-4">
+          <div class="step-hdr">
+            <h3>✍️ Firma Digital</h3>
+            <p>Firmá en el recuadro (el cliente firmará a mano en el documento impreso)</p>
+          </div>
+
+          <div class="sig-wrap">
+            <div class="sig-owner-label">Firma del Prestador de Servicios — Tobias Ezequiel Obregon</div>
+            <canvas id="sig-servicios" class="sig-canvas"></canvas>
+            <button class="btn-clear-sig" onclick="clearSignature('servicios')">🗑 Limpiar firma</button>
+          </div>
+
+          <div class="preview-card" id="servicios-preview-card">
+            <div class="preview-title">📋 Resumen del Contrato</div>
+            <div class="preview-grid" id="servicios-preview-content"></div>
+          </div>
+
+          <div class="step-nav gen-nav">
+            <button class="btn-outline" onclick="prevStep('servicios',4)">← Anterior</button>
+            <div class="gen-group">
+              <button class="btn-gen btn-gen-client" onclick="generatePDF('servicios','cliente')">
+                <span class="gen-ico">📄</span>
+                <div><div class="gen-lbl">PDF para el Cliente</div><div class="gen-sub">Copia ORIGINAL</div></div>
+              </button>
+              <button class="btn-gen btn-gen-copy" onclick="generatePDF('servicios','copia')">
+                <span class="gen-ico">📋</span>
+                <div><div class="gen-lbl">Mi Copia</div><div class="gen-sub">Copia del NEGOCIO</div></div>
+              </button>
+            </div>
+          </div>
+
+          <div class="success-bar" id="servicios-success" style="display:none">
+            <span>✅</span>
+            <div><strong>¡PDF generado!</strong><br>Podés generar ambas copias con el mismo número de contrato.</div>
+            <button class="btn-new-contract" onclick="startNewContract('servicios')">+ Nuevo Contrato</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══ SETTINGS MODAL ═══ -->
+  <div class="modal-overlay" id="modal-settings" style="display:none" onclick="closeSettings(event)">
+    <div class="modal-box">
+      <div class="modal-hdr">
+        <h3>⚙️ Configuración</h3>
+        <button class="modal-cls" onclick="closeSettings()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-sec">
+          <h4>Logo del Negocio</h4>
+          <div class="logo-prev-area" id="logo-prev-area">
+            <img id="settings-logo-preview" src="" alt="" style="display:none; max-width:220px; max-height:80px; object-fit:contain;">
+            <div id="settings-logo-ph" class="logo-ph">Sin logo cargado — subí tu logo aquí</div>
+          </div>
+          <label class="upload-logo-btn" for="logo-file-input">📁 Subir Logo (PNG, JPG)</label>
+          <input type="file" id="logo-file-input" accept="image/*" style="display:none" onchange="handleLogoUpload(event)">
+          <button class="btn-danger-sm" id="btn-remove-logo" onclick="removeLogo()" style="display:none">Quitar logo</button>
+        </div>
+        <div class="settings-sec">
+          <h4>Estadísticas</h4>
+          <div class="settings-info">
+            <div class="info-row"><span>Contratos de Empeño generados:</span><strong id="cfg-empeno-cnt">0</strong></div>
+            <div class="info-row"><span>Contratos de Servicios generados:</span><strong id="cfg-servicios-cnt">0</strong></div>
+          </div>
+        </div>
+        <div class="settings-sec">
+          <h4>Reiniciar Numeración</h4>
+          <p style="color:var(--c-muted);font-size:13px;margin-bottom:10px">Esto reiniciará los contadores al número 1. Los contratos anteriores no se borran.</p>
+          <button class="btn-danger-sm" onclick="resetCounters()">🔄 Reiniciar contadores</button>
+        </div>
+      </div>
+      <div class="modal-ftr">
+        <button class="btn-primary" onclick="closeSettings()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="app-toast"></div>
+
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
