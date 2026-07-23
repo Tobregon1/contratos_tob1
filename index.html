@@ -21,6 +21,7 @@
           </div>
         </div>
       <div class="header-actions">
+        <button class="hdr-btn" onclick="navigate('historial')" title="Historial de Contratos">📋</button>
         <button class="hdr-btn" onclick="openSettings()" title="Configuración">⚙</button>
       </div>
     </div>
@@ -105,6 +106,46 @@
           </div>
         </div>
 
+      </div>
+    </section>
+
+    <!-- ═══ HISTORIAL VIEW ═══ -->
+    <section id="view-historial" class="view">
+      <div class="form-container">
+        <div class="form-topbar">
+          <button class="back-btn" onclick="navigate('home')">← Inicio</button>
+          <div class="form-title-wrap">
+            <h2 class="form-title">Historial de Contratos</h2>
+          </div>
+          <div style="width:90px"></div>
+        </div>
+        
+        <div class="fstep active" style="margin-top:20px;">
+          <div class="step-hdr" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <h3>📋 Registros Guardados</h3>
+              <p>Contratos sincronizados en la nube</p>
+            </div>
+            <button class="btn-primary" style="padding:8px 16px; font-size:14px;" onclick="loadHistory()">🔄 Actualizar</button>
+          </div>
+          
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:14px;">
+              <thead>
+                <tr style="border-bottom:2px solid var(--c-border); color:var(--c-muted);">
+                  <th style="padding:12px 8px;">Fecha</th>
+                  <th style="padding:12px 8px;">Tipo</th>
+                  <th style="padding:12px 8px;">N°</th>
+                  <th style="padding:12px 8px;">Cliente</th>
+                  <th style="padding:12px 8px;">Monto / Precio</th>
+                </tr>
+              </thead>
+              <tbody id="historial-tbody">
+                <tr><td colspan="5" style="padding:16px; text-align:center; color:var(--c-muted);">Cargando historial...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -238,6 +279,9 @@
                 <span class="gen-ico">📋</span>
                 <div><div class="gen-lbl">Mi Copia</div><div class="gen-sub">Copia del NEGOCIO</div></div>
               </button>
+            </div>
+            <div style="display:flex; justify-content:center; margin-top:15px; width:100%;">
+              <button class="btn-success" onclick="shareWhatsApp('empeño')" style="width:100%; max-width:420px; font-size:16px; font-weight:600; padding:16px; border:none; border-radius:12px; cursor:pointer; color:white; background:#25D366;">💬 Enviar Resumen por WhatsApp</button>
             </div>
           </div>
 
@@ -391,6 +435,9 @@
                 <div><div class="gen-lbl">Mi Copia</div><div class="gen-sub">Copia del NEGOCIO</div></div>
               </button>
             </div>
+            <div style="display:flex; justify-content:center; margin-top:15px; width:100%;">
+              <button class="btn-success" onclick="shareWhatsApp('servicios')" style="width:100%; max-width:420px; font-size:16px; font-weight:600; padding:16px; border:none; border-radius:12px; cursor:pointer; color:white; background:#25D366;">💬 Enviar Resumen por WhatsApp</button>
+            </div>
           </div>
 
           <div class="success-bar" id="servicios-success" style="display:none">
@@ -446,6 +493,7 @@
   <div class="toast" id="app-toast"></div>
 
   <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>

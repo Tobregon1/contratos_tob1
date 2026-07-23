@@ -614,3 +614,9 @@ input[type="date"] { color-scheme: dark; }
   .stat-sep { width: 80%; height: 1px; }
   .success-bar { flex-wrap: wrap; }
 }
+
+/* ─── VALIDATION ─────────────────────────────── */
+.input-error {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
