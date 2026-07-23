@@ -92,6 +92,10 @@ function navigate(view) {
     document.getElementById('s-tipo-label').value = '';
     resetForm('servicios');
   }
+
+  if (view === 'historial') {
+    loadHistory();
+  }
 }
 
 function resetForm(type) {
@@ -890,6 +894,19 @@ function generateEmpeñoPDF(copyType) {
   const apellido = g('e-apellido').replace(/\s+/g, '_') || 'SinApellido';
   savePDF(doc, `Empeño_${num}_${apellido}_${label}.pdf`);
 
+  if (copyType === 'cliente') {
+    saveContractToSupabase({
+      tipo: 'empeño',
+      num_contrato: `N° ${num}`,
+      cliente_nombre: nombre.trim(),
+      cliente_dni: dni,
+      cliente_telefono: tel,
+      descripcion: `${art} ${g('e-marca')} ${g('e-modelo')}`.trim(),
+      monto_precio: parseFloat(g('e-monto')) || 0,
+      pdf_base64: doc.output('datauristring')
+    });
+  }
+
   showSuccess('empeño');
   showToast('¡PDF generado correctamente!', 'success');
 }
@@ -1180,16 +1197,17 @@ function generateServiciosPDF(copyType) {
   const label = isCliente ? 'CLIENTE' : 'NEGOCIO';
   const apellido = g('s-apellido').replace(/\s+/g, '_') || 'SinApellido';
   savePDF(doc, `Servicio_${num}_${apellido}_${label}.pdf`);
-  
-  if (tipo === 'cliente') {
+
+  if (copyType === 'cliente') {
     saveContractToSupabase({
       tipo: 'servicios',
       num_contrato: `N° ${num}`,
-      cliente_nombre: `${nombre} ${apellido}`.trim(),
+      cliente_nombre: nombre.trim(),
       cliente_dni: dni,
       cliente_telefono: tel,
       descripcion: `${tipoServ} - ${desc}`.substring(0, 100),
-      monto_precio: parseFloat(precio) || 0
+      monto_precio: parseFloat(precio) || 0,
+      pdf_base64: doc.output('datauristring')
     });
   }
 
@@ -1236,12 +1254,13 @@ function showToast(msg, type) {
 // ─── SUPABASE & HISTORIAL ────────────────────────────────────
 const SUPABASE_URL = 'https://auwyrcnlrzzweamthwxr.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1d3lyY25scnp6d2VhbXRod3hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4Mjc0NzUsImV4cCI6MjEwMDQwMzQ3NX0.7qZpKvGXw6H8I839vxm6yVRK0gG3SwzJkvgMWzucQpk';
-const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 async function saveContractToSupabase(contractData) {
-  if (!supabase) return;
+  if (!supabaseClient) return;
+  contractData.estado_pago = 'pendiente';
   try {
-    const { error } = await supabase.from('contratos').insert([contractData]);
+    const { error } = await supabaseClient.from('contratos').insert([contractData]);
     if (error) console.error('Error guardando en Supabase:', error);
   } catch (err) {
     console.error('Excepción guardando historial:', err);
@@ -1250,11 +1269,11 @@ async function saveContractToSupabase(contractData) {
 
 async function loadHistory() {
   const tbody = document.getElementById('historial-tbody');
-  if (!tbody || !supabase) return;
-  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:16px;">Cargando...</td></tr>';
+  if (!tbody || !supabaseClient) return;
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:16px;">Cargando...</td></tr>';
   
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('contratos')
       .select('*')
       .order('created_at', { ascending: false })
@@ -1263,7 +1282,7 @@ async function loadHistory() {
     if (error) throw error;
     
     if (!data || data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:16px;">No hay contratos guardados aún.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:16px;">No hay contratos guardados aún.</td></tr>';
       return;
     }
     
@@ -1274,13 +1293,39 @@ async function loadHistory() {
         <td style="padding:12px 8px;">${c.num_contrato}</td>
         <td style="padding:12px 8px;">${c.cliente_nombre}</td>
         <td style="padding:12px 8px;">$${c.monto_precio}</td>
+        <td style="padding:12px 8px;">
+          <button onclick="toggleEstadoPago('${c.id}', '${c.estado_pago || 'pendiente'}')" 
+                  style="border:none; border-radius:12px; padding:4px 10px; font-size:12px; cursor:pointer; font-weight:bold;
+                         background: ${c.estado_pago === 'pagado' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}; 
+                         color: ${c.estado_pago === 'pagado' ? '#22C55E' : '#EF4444'};">
+            ${c.estado_pago === 'pagado' ? '✅ Pagado' : '❌ Pendiente'}
+          </button>
+        </td>
+        <td style="padding:12px 8px;">
+          ${c.pdf_base64 
+            ? `<a href="${c.pdf_base64}" download="Contrato_${c.num_contrato.replace(' ', '')}_${c.cliente_nombre.replace(/\s+/g, '_')}.pdf" style="text-decoration:none; color:var(--c-purple-l); font-weight:bold; font-size:20px;" title="Descargar PDF">📄</a>` 
+            : `<span style="color:var(--c-muted); font-size:12px;">N/A</span>`}
+        </td>
       </tr>
     `).join('');
   } catch (err) {
     console.error('Error cargando historial', err);
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:16px; color:red;">Error al cargar el historial.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:16px; color:red;">Error al cargar el historial.</td></tr>';
   }
 }
+
+window.toggleEstadoPago = async function(id, currentEstado) {
+  if (!supabaseClient) return;
+  const nuevoEstado = currentEstado === 'pagado' ? 'pendiente' : 'pagado';
+  try {
+    const { error } = await supabaseClient.from('contratos').update({ estado_pago: nuevoEstado }).eq('id', id);
+    if (error) throw error;
+    loadHistory();
+  } catch (err) {
+    console.error('Error actualizando pago:', err);
+    showToast('Error actualizando el estado de pago', 'error');
+  }
+};
 
 // ─── VALIDATION ──────────────────────────────────────────────
 function validateForm(type) {
@@ -1324,12 +1369,11 @@ function shareWhatsApp(type) {
     const articulo = document.getElementById('e-artículo').value;
     const total = document.getElementById('e-total-display').innerText;
     
-    msg = `Hola ${nombre}, te adjuntamos el resumen de tu Contrato de Empeño ${num}.%0A%0A`
-        + `Artículo: ${articulo}%0A`
-        + `Monto prestado: $${monto}%0A`
-        + `Total a devolver: ${total}%0A%0A`
+    msg = `Hola ${nombre}, te adjuntamos el resumen de tu *Contrato de Empeño ${num}*.\n\n`
+        + `*Artículo:* ${articulo}\n`
+        + `*Monto prestado:* $${monto}\n`
+        + `*Total a devolver:* ${total}\n\n`
         + `¡Gracias por confiar en Genesis Informatica!`;
-        
   } else if (type === 'servicios') {
     tel = document.getElementById('s-teléfono').value.trim();
     const nombre = document.getElementById('s-nombre').value.trim() || 'Cliente';
@@ -1337,9 +1381,9 @@ function shareWhatsApp(type) {
     const servicio = document.getElementById('s-tipo-label').value || 'Servicio';
     const precio = document.getElementById('s-precio').value;
     
-    msg = `Hola ${nombre}, te adjuntamos el resumen de tu Contrato de Servicios ${num}.%0A%0A`
-        + `Servicio: ${servicio}%0A`
-        + `Precio Total: $${precio}%0A%0A`
+    msg = `Hola ${nombre}, te adjuntamos el resumen de tu *Contrato de Servicios ${num}*.\n\n`
+        + `*Servicio:* ${servicio}\n`
+        + `*Precio Total:* $${precio}\n\n`
         + `¡Gracias por confiar en Genesis Informatica!`;
   }
   
@@ -1354,6 +1398,7 @@ function shareWhatsApp(type) {
     tel = '549' + tel; // Assuming Argentina defaults
   }
   
-  const url = `https://wa.me/${tel}?text=${msg}`;
+  const encodedMsg = encodeURIComponent(msg);
+  const url = `https://wa.me/${tel}?text=${encodedMsg}`;
   window.open(url, '_blank');
 }
