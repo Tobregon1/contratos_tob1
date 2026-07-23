@@ -96,8 +96,8 @@ function navigate(view) {
 
 function resetForm(type) {
   if (type === 'empeño') {
-    const ids = ['e-nombre','e-apellido','e-dni','e-telefono','e-direccion',
-                 'e-articulo','e-marca','e-modelo','e-color','e-valor',
+    const ids = ['e-nombre','e-apellido','e-dni','e-teléfono','e-dirección',
+                 'e-artículo','e-marca','e-modelo','e-color','e-valor',
                  'e-monto','e-tasa','e-plazo','e-obs'];
     ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     const estado = document.getElementById('e-estado');
@@ -109,9 +109,9 @@ function resetForm(type) {
     setTodayDates();
   }
   if (type === 'servicios') {
-    const ids = ['s-nombre','s-apellido','s-dni','s-telefono','s-email','s-direccion',
-                 's-descripcion','s-entregables','s-precio','s-sena','s-plazo',
-                 's-garantia','s-condiciones'];
+    const ids = ['s-nombre','s-apellido','s-dni','s-teléfono','s-email','s-dirección',
+                 's-descripcion','s-entregables','s-precio','s-seña','s-plazo',
+                 's-garantía','s-condiciones'];
     ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     const fp = document.getElementById('s-forma-pago');
     if (fp) fp.value = '';
@@ -189,11 +189,11 @@ function validateStep(type, step) {
       if (!val('e-nombre'))    { shakeField('e-nombre');   showToast('Ingresá el nombre del cliente', 'error'); return false; }
       if (!val('e-apellido'))  { shakeField('e-apellido'); showToast('Ingresá el apellido del cliente', 'error'); return false; }
       if (!val('e-dni'))       { shakeField('e-dni');      showToast('Ingresá el DNI del cliente', 'error'); return false; }
-      if (!val('e-direccion')) { shakeField('e-direccion');showToast('Ingresá el domicilio del cliente', 'error'); return false; }
+      if (!val('e-dirección')) { shakeField('e-dirección');showToast('Ingresá el domicilio del cliente', 'error'); return false; }
       if (!val('e-fecha'))     { shakeField('e-fecha');    showToast('Seleccioná la fecha del contrato', 'error'); return false; }
     }
     if (step === 2) {
-      if (!val('e-articulo'))  { shakeField('e-articulo'); showToast('Describí el artículo en empeño', 'error'); return false; }
+      if (!val('e-artículo'))  { shakeField('e-artículo'); showToast('Describí el artículo en empeño', 'error'); return false; }
       if (!val('e-estado'))    { shakeField('e-estado');   showToast('Seleccioná el estado del artículo', 'error'); return false; }
       if (!val('e-valor'))     { shakeField('e-valor');    showToast('Ingresá el valor estimado del artículo', 'error'); return false; }
     }
@@ -261,8 +261,8 @@ function recalcularEmpeño() {
 
   // Calculate total
   if (monto > 0 && tasa > 0) {
-    const interes = monto * (tasa / 100);
-    const total = monto + interes;
+    const interés = monto * (tasa / 100);
+    const total = monto + interés;
     document.getElementById('e-total-display').textContent = formatCurrency(total);
   } else if (monto > 0) {
     document.getElementById('e-total-display').textContent = formatCurrency(monto);
@@ -330,7 +330,7 @@ function updatePreview(type) {
     const items = [
       { l: 'Cliente', v: `${g('e-nombre')} ${g('e-apellido')}` },
       { l: 'DNI', v: g('e-dni') },
-      { l: 'Artículo', v: g('e-articulo'), full: true },
+      { l: 'Artículo', v: g('e-artículo'), full: true },
       { l: 'Marca / Modelo', v: `${g('e-marca')} ${g('e-modelo')}`.trim() || '—' },
       { l: 'Estado', v: g('e-estado') || '—' },
       { l: 'Valor estimado', v: g('e-valor') ? formatCurrency(g('e-valor')) : '—' },
@@ -346,7 +346,7 @@ function updatePreview(type) {
 
   if (type === 'servicios') {
     const precio = parseFloat(document.getElementById('s-precio').value) || 0;
-    const sena   = parseFloat(document.getElementById('s-sena').value) || 0;
+    const seña   = parseFloat(document.getElementById('s-seña').value) || 0;
 
     const items = [
       { l: 'Cliente', v: `${g('s-nombre')} ${g('s-apellido')}` },
@@ -354,10 +354,10 @@ function updatePreview(type) {
       { l: 'Tipo de servicio', v: App.servicios.tipoLabel || '—' },
       { l: 'Descripción', v: g('s-descripcion'), full: true },
       { l: 'Precio total', v: formatCurrency(precio), highlight: true },
-      { l: 'Anticipo / Seña', v: sena > 0 ? formatCurrency(sena) : '—' },
+      { l: 'Anticipo / Seña', v: seña > 0 ? formatCurrency(seña) : '—' },
       { l: 'Forma de pago', v: g('s-forma-pago') || '—' },
       { l: 'Plazo de entrega', v: g('s-plazo') || '—' },
-      { l: 'Garantía', v: g('s-garantia') || '—' },
+      { l: 'Garantía', v: g('s-garantía') || '—' },
     ];
 
     renderPreview('servicios-preview-content', items);
@@ -594,10 +594,10 @@ function generateEmpeñoPDF(copyType) {
   const num    = padNum(App.empeño.contractNum, 4);
   const nombre = `${g('e-nombre')} ${g('e-apellido')}`;
   const dni    = g('e-dni');
-  const tel    = g('e-telefono');
-  const dir    = g('e-direccion');
+  const tel    = g('e-teléfono');
+  const dir    = g('e-dirección');
   const fecha  = g('e-fecha');
-  const art    = g('e-articulo');
+  const art    = g('e-artículo');
   const marca  = g('e-marca');
   const modelo = g('e-modelo');
   const color  = g('e-color');
@@ -609,8 +609,8 @@ function generateEmpeñoPDF(copyType) {
   const periodo = g('e-periodo') || 'mensual';
   const obs    = g('e-obs');
 
-  const interes = monto * (tasa / 100);
-  const total   = monto + interes;
+  const interés = monto * (tasa / 100);
+  const total   = monto + interés;
 
   // Vencimiento
   let vencStr = '—';
@@ -672,7 +672,7 @@ function generateEmpeñoPDF(copyType) {
   doc.setFontSize(8.5);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...GRAY);
-  doc.text('Tobias Ezequiel Obregon', PW - M, y + 11, { align: 'right' });
+  doc.text('Tobias Ezequiel Obregón', PW - M, y + 11, { align: 'right' });
   doc.text('CUIT: 20-43534626-0', PW - M, y + 15.5, { align: 'right' });
   doc.text('Corrientes Capital, Argentina', PW - M, y + 20, { align: 'right' });
 
@@ -714,7 +714,7 @@ function generateEmpeñoPDF(copyType) {
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...DARK);
-  const intro = `En la ciudad de Corrientes Capital, Provincia de Corrientes, Republica Argentina, el dia ${formatDate(fecha)}, entre:`;
+  const intro = `En la ciudad de Corrientes Capital, Provincia de Corrientes, República Argentina, el día ${formatDate(fecha)}, entre:`;
   const introLines = doc.splitTextToSize(intro, CW);
   doc.text(introLines, M, y);
   y += introLines.length * 5 + 3;
@@ -744,7 +744,7 @@ function generateEmpeñoPDF(copyType) {
   doc.setTextColor(...DARK);
   let clientDesc = `${nombre}, DNI N° ${dni}`;
   if (dir)  clientDesc += `, domiciliado/a en ${dir}`;
-  if (tel)  clientDesc += `, telefono: ${tel}`;
+  if (tel)  clientDesc += `, teléfono: ${tel}`;
   clientDesc += `; en adelante denominado/a "EL CLIENTE";`;
   const clientLines = doc.splitTextToSize(clientDesc, CW - 4);
   y += 5;
@@ -752,7 +752,7 @@ function generateEmpeñoPDF(copyType) {
   y += clientLines.length * 5 + 4;
 
   const acuerdoLines = doc.splitTextToSize(
-    `Se conviene el presente CONTRATO DE EMPEÑO sujeto a las siguientes clausulas y condiciones:`, CW
+    `Se conviene el presente CONTRATO DE EMPEÑO sujeto a las siguientes cláusulas y condiciones:`, CW
   );
   doc.setFontSize(9.5);
   doc.text(acuerdoLines, M, y);
@@ -764,7 +764,7 @@ function generateEmpeñoPDF(copyType) {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9.5);
     doc.setTextColor(...PURPLE);
-    doc.text(`CLAUSULA ${number} — ${title}`, M, y);
+    doc.text(`CLÁUSULA ${number} — ${title}`, M, y);
     y += 5;
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...DARK);
@@ -778,37 +778,37 @@ function generateEmpeñoPDF(copyType) {
   // Clause 1 — Artículo
   let artDesc = art;
   if (marca || modelo) artDesc += `. Marca/Modelo: ${[marca, modelo].filter(Boolean).join(' / ')}`;
-  if (color) artDesc += `. Color/Caracteristicas: ${color}`;
+  if (color) artDesc += `. Color/Características: ${color}`;
   addClause('PRIMERA', 'OBJETO DEL CONTRATO',
-    `El CLIENTE entrega voluntariamente al PRESTAMISTA, en calidad de empeño y como garantia del prestamo otorgado, el siguiente bien:\n\n` +
-    `Descripcion: ${artDesc}\n` +
-    `Estado del articulo: ${estado || 'A determinar'}\n` +
+    `El CLIENTE entrega voluntariamente al PRESTAMISTA, en calidad de empeño y como garantía del préstamo otorgado, el siguiente bien:\n\n` +
+    `Descripción: ${artDesc}\n` +
+    `Estado del artículo: ${estado || 'A determinar'}\n` +
     `Valor estimado por el PRESTAMISTA: ${formatCurrency(valor)}\n\n` +
-    `El CLIENTE declara ser el unico y legitimo propietario del bien descrito y que el mismo se encuentra libre de todo gravamen, embargo o reclamo de terceros.`
+    `El CLIENTE declara ser el único y legítimo propietario del bien descrito y que el mismo se encuentra libre de todo gravamen, embargo o reclamo de terceros.`
   );
 
-  addClause('SEGUNDA', 'MONTO DEL PRESTAMO',
-    `El PRESTAMISTA otorga al CLIENTE en prestamo la suma de PESOS ${numberToWords(monto)} (${formatCurrency(monto)}), en concepto de prestamo garantizado con el articulo detallado en la Clausula Primera. El CLIENTE declara haber recibido dicha suma en efectivo/transferencia y en conformidad.`
+  addClause('SEGUNDA', 'MONTO DEL PRÉSTAMO',
+    `El PRESTAMISTA otorga al CLIENTE en préstamo la suma de PESOS ${numberToWords(monto)} (${formatCurrency(monto)}), en concepto de préstamo garantizado con el artículo detallado en la Cláusula Primera. El CLIENTE declara haber recibido dicha suma en efectivo/transferencia y en conformidad.`
   );
 
   addClause('TERCERA', 'PLAZO',
-    `El presente contrato tiene una vigencia de ${plazo} (${numberToWords(plazo)}) dias corridos, contados a partir de la fecha de suscripcion, venciendo el dia ${vencStr}.`
+    `El presente contrato tiene una vigencia de ${plazo} (${numberToWords(plazo)}) días corridos, contados a partir de la fecha de suscripción, venciendo el día ${vencStr}.`
   );
 
   addClause('CUARTA', 'INTERESES Y TOTAL A DEVOLVER',
-    `Se establece una tasa de interes del ${tasa}% ${periodo}. El CLIENTE debera abonar al PRESTAMISTA, al momento del rescate, la suma total de PESOS ${numberToWords(total)} (${formatCurrency(total)}), correspondiente al capital prestado (${formatCurrency(monto)}) mas los intereses acordados (${formatCurrency(interes)}).`
+    `Se establece una tasa de interés del ${tasa}% ${periodo}. El CLIENTE deberá abonar al PRESTAMISTA, al momento del rescate, la suma total de PESOS ${numberToWords(total)} (${formatCurrency(total)}), correspondiente al capital prestado (${formatCurrency(monto)}) más los intereses acordados (${formatCurrency(interés)}).`
   );
 
   addClause('QUINTA', 'RESCATE DEL ARTICULO',
-    `Para recuperar el bien empeñado, el CLIENTE debera abonar la totalidad del monto indicado en la Clausula Cuarta (${formatCurrency(total)}) antes del vencimiento establecido el dia ${vencStr}. El pago debera efectuarse en las instalaciones del PRESTAMISTA, en efectivo o por el medio que las partes acuerden en ese momento.`
+    `Para recuperar el bien empeñado, el CLIENTE deberá abonar la totalidad del monto indicado en la Cláusula Cuarta (${formatCurrency(total)}) antes del vencimiento establecido el día ${vencStr}. El pago deberá efectuarse en las instalaciones del PRESTAMISTA, en efectivo o por el medio que las partes acuerden en ese momento.`
   );
 
   addClause('SEXTA', 'VENCIMIENTO E INCUMPLIMIENTO',
-    `En caso de no producirse el rescate del articulo antes de la fecha de vencimiento establecida, el CLIENTE perdera en forma definitiva e irrevocable el derecho sobre el bien empeñado. El bien quedará en propiedad del PRESTAMISTA sin necesidad de notificacion previa, intimacion adicional, ni accion judicial alguna. El CLIENTE declara conocer y aceptar expresamente esta condicion al momento de la firma del presente contrato.`
+    `En caso de no producirse el rescate del artículo antes de la fecha de vencimiento establecida, el CLIENTE perderá en forma definitiva e irrevocable el derecho sobre el bien empeñado. El bien quedará en propiedad del PRESTAMISTA sin necesidad de notificación previa, intimación adicional, ni acción judicial alguna. El CLIENTE declara conocer y aceptar expresamente esta condición al momento de la firma del presente contrato.`
   );
 
   addClause('SEPTIMA', 'CONDICIONES GENERALES',
-    `El CLIENTE garantiza que el bien entregado en empeño no es producto de delito y que es su legitimo propietario. Las partes renuncian a cualquier fuero que pudiera corresponderles sometiendose a la jurisdiccion de los Tribunales Ordinarios de la ciudad de Corrientes, Argentina.` +
+    `El CLIENTE garantiza que el bien entregado en empeño no es producto de delito y que es su legítimo propietario. Las partes renuncian a cualquier fuero que pudiera corresponderles sometiendose a la jurisdicción de los Tribunales Ordinarios de la ciudad de Corrientes, Argentina.` +
     (obs ? `\n\nOBSERVACIONES: ${obs}` : '')
   );
 
@@ -818,7 +818,7 @@ function generateEmpeñoPDF(copyType) {
   doc.setFontSize(9.5);
   doc.setTextColor(...DARK);
   const conformLines = doc.splitTextToSize(
-    `CONFORMIDAD: En prueba de conformidad se firman dos (2) ejemplares de un mismo tenor y a un solo efecto, en la ciudad de Corrientes Capital, el dia ${formatDate(fecha)}.`,
+    `CONFORMIDAD: En prueba de conformidad se firman dos (2) ejemplares de un mismo tenor y a un solo efecto, en la ciudad de Corrientes Capital, el día ${formatDate(fecha)}.`,
     CW
   );
   doc.text(conformLines, M, y);
@@ -876,7 +876,7 @@ function generateEmpeñoPDF(copyType) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(...DARK);
-  doc.text('Tobias Ezequiel Obregon', rightX + sigBoxW / 2, y + 37, { align: 'center' });
+  doc.text('Tobias Ezequiel Obregón', rightX + sigBoxW / 2, y + 37, { align: 'center' });
   doc.text('CUIT: 20-43534626-0', rightX + sigBoxW / 2, y + 42, { align: 'center' });
   doc.text('Genesis Informatica', rightX + sigBoxW / 2, y + 47, { align: 'center' });
 
@@ -909,20 +909,20 @@ function generateServiciosPDF(copyType) {
   const num    = padNum(App.servicios.contractNum, 4);
   const nombre = `${g('s-nombre')} ${g('s-apellido')}`;
   const dni    = g('s-dni');
-  const tel    = g('s-telefono');
+  const tel    = g('s-teléfono');
   const email  = g('s-email');
-  const dir    = g('s-direccion');
+  const dir    = g('s-dirección');
   const fecha  = g('s-fecha');
   const tipo   = App.servicios.tipoLabel || g('s-tipo-label') || 'Servicio';
   const desc   = g('s-descripcion');
   const entregables = g('s-entregables');
   const precio = parseFloat(g('s-precio')) || 0;
-  const sena   = parseFloat(g('s-sena')) || 0;
-  const restante = precio - sena;
+  const seña   = parseFloat(g('s-seña')) || 0;
+  const restante = precio - seña;
   const formaPago  = g('s-forma-pago');
   const plazo  = g('s-plazo');
   const fechaEnt = g('s-fecha-entrega');
-  const garantia   = g('s-garantia');
+  const garantía   = g('s-garantía');
   const condiciones = g('s-condiciones');
 
   let sigData = null;
@@ -972,7 +972,7 @@ function generateServiciosPDF(copyType) {
   doc.setFontSize(8.5);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...GRAY);
-  doc.text('Tobias Ezequiel Obregon', PW - M, y + 11, { align: 'right' });
+  doc.text('Tobias Ezequiel Obregón', PW - M, y + 11, { align: 'right' });
   doc.text('CUIT: 20-43534626-0', PW - M, y + 15.5, { align: 'right' });
   doc.text('Corrientes Capital, Argentina', PW - M, y + 20, { align: 'right' });
 
@@ -1000,7 +1000,7 @@ function generateServiciosPDF(copyType) {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
   doc.setTextColor(...DARK);
-  doc.text(`CONTRATO DE PRESTACION DE SERVICIOS N° ${num}`, PW / 2, y, { align: 'center' });
+  doc.text(`CONTRATO DE PRESTACIÓN DE SERVICIOS N° ${num}`, PW / 2, y, { align: 'center' });
   y += 3;
   doc.setFontSize(10);
   doc.setTextColor(...PURPLE);
@@ -1013,7 +1013,7 @@ function generateServiciosPDF(copyType) {
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...DARK);
-  const intro = `En la ciudad de Corrientes Capital, Provincia de Corrientes, Republica Argentina, el dia ${formatDate(fecha)}, entre:`;
+  const intro = `En la ciudad de Corrientes Capital, Provincia de Corrientes, República Argentina, el día ${formatDate(fecha)}, entre:`;
   const introLines = doc.splitTextToSize(intro, CW);
   doc.text(introLines, M, y);
   y += introLines.length * 5 + 3;
@@ -1026,7 +1026,7 @@ function generateServiciosPDF(copyType) {
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...DARK);
   const prestLines = doc.splitTextToSize(
-    `Genesis Informatica, representada por Tobias Ezequiel Obregon, CUIT N° 20-43534626-0, con domicilio en Corrientes Capital, Argentina; en adelante denominado "EL PRESTADOR";`,
+    `Genesis Informatica, representada por Tobias Ezequiel Obregón, CUIT N° 20-43534626-0, con domicilio en Corrientes Capital, Argentina; en adelante denominado "EL PRESTADOR";`,
     CW - 4
   );
   y += 5;
@@ -1043,7 +1043,7 @@ function generateServiciosPDF(copyType) {
   doc.setTextColor(...DARK);
   let clientDesc = `${nombre}, DNI/CUIT N° ${dni}`;
   if (dir)   clientDesc += `, domiciliado/a en ${dir}`;
-  if (tel)   clientDesc += `, telefono: ${tel}`;
+  if (tel)   clientDesc += `, teléfono: ${tel}`;
   if (email) clientDesc += `, email: ${email}`;
   clientDesc += `; en adelante denominado/a "EL CLIENTE";`;
   const clientLines = doc.splitTextToSize(clientDesc, CW - 4);
@@ -1051,7 +1051,7 @@ function generateServiciosPDF(copyType) {
   doc.text(clientLines, M + 4, y);
   y += clientLines.length * 5 + 4;
 
-  const acuLines = doc.splitTextToSize(`Se conviene el presente CONTRATO DE PRESTACION DE SERVICIOS sujeto a las siguientes clausulas y condiciones:`, CW);
+  const acuLines = doc.splitTextToSize(`Se conviene el presente CONTRATO DE PRESTACIÓN DE SERVICIOS sujeto a las siguientes cláusulas y condiciones:`, CW);
   doc.text(acuLines, M, y);
   y += acuLines.length * 5 + 5;
 
@@ -1061,7 +1061,7 @@ function generateServiciosPDF(copyType) {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9.5);
     doc.setTextColor(...PURPLE);
-    doc.text(`CLAUSULA ${number} — ${title}`, M, y);
+    doc.text(`CLÁUSULA ${number} — ${title}`, M, y);
     y += 5;
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...DARK);
@@ -1078,9 +1078,9 @@ function generateServiciosPDF(copyType) {
     (entregables ? `\n\nALCANCE Y ENTREGABLES: ${entregables}` : '')
   );
 
-  let precioClausa = `El precio total convenido por los servicios descriptos en la Clausula Primera es de PESOS ${numberToWords(precio)} (${formatCurrency(precio)}).`;
-  if (sena > 0) {
-    precioClausa += ` El CLIENTE abona en concepto de seña o anticipo la suma de ${formatCurrency(sena)}, quedando un saldo pendiente de ${formatCurrency(restante)} a abonar segun las condiciones acordadas.`;
+  let precioClausa = `El precio total convenido por los servicios descriptos en la Cláusula Primera es de PESOS ${numberToWords(precio)} (${formatCurrency(precio)}).`;
+  if (seña > 0) {
+    precioClausa += ` El CLIENTE abona en concepto de seña o anticipo la suma de ${formatCurrency(seña)}, quedando un saldo pendiente de ${formatCurrency(restante)} a abonar según las condiciones acordadas.`;
   }
   precioClausa += ` Forma de pago: ${formaPago}.`;
 
@@ -1090,23 +1090,23 @@ function generateServiciosPDF(copyType) {
   if (plazo) plazoClausa += `El plazo de entrega es de ${plazo}. `;
   if (fechaEnt) plazoClausa += `Fecha estimada de entrega: ${formatDate(fechaEnt)}. `;
   if (!plazoClausa) plazoClausa = 'El plazo de entrega sera acordado entre las partes una vez iniciados los trabajos. ';
-  plazoClausa += 'El PRESTADOR se compromete a notificar con anticipacion razonable cualquier demora justificada en la entrega.';
+  plazoClausa += 'El PRESTADOR se compromete a notificar con anticipación razonable cualquier demora justificada en la entrega.';
   addClause('TERCERA', 'PLAZO DE ENTREGA', plazoClausa);
 
-  let garantClausa = garantia || 'El PRESTADOR garantiza que los servicios seran ejecutados con profesionalidad y diligencia.';
-  garantClausa += ' En caso de defectos imputables al PRESTADOR, este se obliga a corregirlos sin cargo adicional dentro del periodo de garantia establecido.';
-  addClause('CUARTA', 'GARANTIA DEL SERVICIO', garantClausa);
+  let garantClausa = garantía || 'El PRESTADOR garantiza que los servicios serán ejecutados con profesionalidad y diligencia.';
+  garantClausa += ' En caso de defectos imputables al PRESTADOR, este se obliga a corregirlos sin cargo adicional dentro del periodo de garantía establecido.';
+  addClause('CUARTA', 'GARANTÍA DEL SERVICIO', garantClausa);
 
   addClause('QUINTA', 'OBLIGACIONES DEL CLIENTE',
     `EL CLIENTE se obliga a: (a) proporcionar oportunamente toda la informacion y materiales necesarios para la ejecucion del servicio; (b) efectuar los pagos en los plazos y formas convenidas; (c) prestar colaboracion razonable cuando el servicio lo requiera. La demora del CLIENTE en el cumplimiento de estas obligaciones podra justificar una extension proporcional del plazo de entrega.`
   );
 
   addClause('SEXTA', 'PROPIEDAD INTELECTUAL Y CONFIDENCIALIDAD',
-    `Los trabajos, disenos, codigos, materiales y demas productos generados en el marco del presente contrato seran propiedad del CLIENTE una vez recibido el pago total del precio acordado. Hasta ese momento, el PRESTADOR conserva todos los derechos sobre los mismos. Ambas partes se obligan a mantener confidencialidad sobre la informacion sensible compartida durante la ejecucion del contrato.`
+    `Los trabajos, disenos, codigos, materiales y demas productos generados en el marco del presente contrato serán propiedad del CLIENTE una vez recibido el pago total del precio acordado. Hasta ese momento, el PRESTADOR conserva todos los derechos sobre los mismos. Ambas partes se obligan a mantener confidencialidad sobre la informacion sensible compartida durante la ejecucion del contrato.`
   );
 
   addClause('SEPTIMA', 'CONDICIONES GENERALES Y JURISDICCION',
-    `En caso de discrepancias no previstas en este contrato, las partes se comprometen a resolverlas de buena fe y de comun acuerdo. En caso de no llegar a un acuerdo, las partes se someten a la jurisdiccion de los Tribunales Ordinarios de la ciudad de Corrientes, Argentina, renunciando a cualquier otro fuero que pudiera corresponderles.` +
+    `En caso de discrepancias no previstas en este contrato, las partes se comprometen a resolverlas de buena fe y de comun acuerdo. En caso de no llegar a un acuerdo, las partes se someten a la jurisdicción de los Tribunales Ordinarios de la ciudad de Corrientes, Argentina, renunciando a cualquier otro fuero que pudiera corresponderles.` +
     (condiciones ? `\n\nCONDICIONES ADICIONALES: ${condiciones}` : '')
   );
 
@@ -1116,7 +1116,7 @@ function generateServiciosPDF(copyType) {
   doc.setFontSize(9.5);
   doc.setTextColor(...DARK);
   const conformLines = doc.splitTextToSize(
-    `CONFORMIDAD: En prueba de conformidad se firman dos (2) ejemplares de un mismo tenor y a un solo efecto, en la ciudad de Corrientes Capital, el dia ${formatDate(fecha)}.`,
+    `CONFORMIDAD: En prueba de conformidad se firman dos (2) ejemplares de un mismo tenor y a un solo efecto, en la ciudad de Corrientes Capital, el día ${formatDate(fecha)}.`,
     CW
   );
   doc.text(conformLines, M, y);
@@ -1170,7 +1170,7 @@ function generateServiciosPDF(copyType) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(...DARK);
-  doc.text('Tobias Ezequiel Obregon', rightX + sigBoxW / 2, y + 37, { align: 'center' });
+  doc.text('Tobias Ezequiel Obregón', rightX + sigBoxW / 2, y + 37, { align: 'center' });
   doc.text('CUIT: 20-43534626-0', rightX + sigBoxW / 2, y + 42, { align: 'center' });
   doc.text('Genesis Informatica', rightX + sigBoxW / 2, y + 47, { align: 'center' });
 

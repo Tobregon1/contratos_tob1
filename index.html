@@ -141,8 +141,8 @@
             <div class="fgroup"><label for="e-nombre">Nombre <span class="req">*</span></label><input type="text" id="e-nombre" placeholder="Nombre"></div>
             <div class="fgroup"><label for="e-apellido">Apellido <span class="req">*</span></label><input type="text" id="e-apellido" placeholder="Apellido"></div>
             <div class="fgroup"><label for="e-dni">DNI <span class="req">*</span></label><input type="text" id="e-dni" placeholder="Número de DNI"></div>
-            <div class="fgroup"><label for="e-telefono">Teléfono</label><input type="tel" id="e-telefono" placeholder="Ej: 3794-123456"></div>
-            <div class="fgroup span2"><label for="e-direccion">Domicilio <span class="req">*</span></label><input type="text" id="e-direccion" placeholder="Dirección completa del cliente"></div>
+            <div class="fgroup"><label for="e-teléfono">Teléfono</label><input type="tel" id="e-teléfono" placeholder="Ej: 3794-123456"></div>
+            <div class="fgroup span2"><label for="e-dirección">Domicilio <span class="req">*</span></label><input type="text" id="e-dirección" placeholder="Dirección completa del cliente"></div>
             <div class="fgroup"><label for="e-fecha">Fecha del Contrato <span class="req">*</span></label><input type="date" id="e-fecha"></div>
           </div>
           <div class="step-nav">
@@ -158,7 +158,7 @@
             <p>Describí el artículo que se entrega como garantía</p>
           </div>
           <div class="fgrid">
-            <div class="fgroup span2"><label for="e-articulo">Descripción del Artículo <span class="req">*</span></label><textarea id="e-articulo" rows="3" placeholder="Descripción detallada del artículo (tipo, características, etc.)"></textarea></div>
+            <div class="fgroup span2"><label for="e-artículo">Descripción del Artículo <span class="req">*</span></label><textarea id="e-artículo" rows="3" placeholder="Descripción detallada del artículo (tipo, características, etc.)"></textarea></div>
             <div class="fgroup"><label for="e-marca">Marca</label><input type="text" id="e-marca" placeholder="Ej: Samsung, HP, Apple..."></div>
             <div class="fgroup"><label for="e-modelo">Modelo / N° de Serie</label><input type="text" id="e-modelo" placeholder="Modelo o número de serie"></div>
             <div class="fgroup"><label for="e-color">Color / Características</label><input type="text" id="e-color" placeholder="Color u otras características visibles"></div>
@@ -217,7 +217,7 @@
           </div>
 
           <div class="sig-wrap">
-            <div class="sig-owner-label">Firma del Prestamista — Tobias Ezequiel Obregon</div>
+            <div class="sig-owner-label">Firma del Prestamista — Tobias Ezequiel Obregón</div>
             <canvas id="sig-empeño" class="sig-canvas"></canvas>
             <button class="btn-clear-sig" onclick="clearSignature('empeño')">🗑 Limpiar firma</button>
           </div>
@@ -284,10 +284,10 @@
             <div class="fgroup"><label for="s-nombre">Nombre <span class="req">*</span></label><input type="text" id="s-nombre" placeholder="Nombre"></div>
             <div class="fgroup"><label for="s-apellido">Apellido <span class="req">*</span></label><input type="text" id="s-apellido" placeholder="Apellido"></div>
             <div class="fgroup"><label for="s-dni">DNI / CUIT <span class="req">*</span></label><input type="text" id="s-dni" placeholder="Número de DNI o CUIT"></div>
-            <div class="fgroup"><label for="s-telefono">Teléfono</label><input type="tel" id="s-telefono" placeholder="Ej: 3794-123456"></div>
+            <div class="fgroup"><label for="s-teléfono">Teléfono</label><input type="tel" id="s-teléfono" placeholder="Ej: 3794-123456"></div>
             <div class="fgroup"><label for="s-email">Email</label><input type="email" id="s-email" placeholder="correo@ejemplo.com"></div>
             <div class="fgroup"><label for="s-fecha">Fecha del Contrato <span class="req">*</span></label><input type="date" id="s-fecha"></div>
-            <div class="fgroup span2"><label for="s-direccion">Domicilio</label><input type="text" id="s-direccion" placeholder="Dirección del cliente"></div>
+            <div class="fgroup span2"><label for="s-dirección">Domicilio</label><input type="text" id="s-dirección" placeholder="Dirección del cliente"></div>
           </div>
           <div class="step-nav">
             <button class="btn-outline" onclick="navigate('home')">Cancelar</button>
@@ -305,7 +305,7 @@
             <div class="fgroup span2">
               <label>Tipo de Servicio <span class="req">*</span></label>
               <div class="stype-grid">
-                <div class="stype-card" id="stype-programacion" onclick="selectServiceType('programacion','Programacion')">
+                <div class="stype-card" id="stype-programación" onclick="selectServiceType('programación','Programacion')">
                   <div class="stype-emoji">💻</div>
                   <span>Programación</span>
                 </div>
@@ -313,7 +313,7 @@
                   <div class="stype-emoji">📢</div>
                   <span>Marketing</span>
                 </div>
-                <div class="stype-card" id="stype-tecnico" onclick="selectServiceType('tecnico','Servicio Tecnico de PC e Impresoras')">
+                <div class="stype-card" id="stype-técnico" onclick="selectServiceType('técnico','Servicio Tecnico de PC e Impresoras')">
                   <div class="stype-emoji">🔧</div>
                   <span>Técnico PC / Impresoras</span>
                 </div>
@@ -338,7 +338,7 @@
           </div>
           <div class="fgrid">
             <div class="fgroup"><label for="s-precio">Precio Total (ARS $) <span class="req">*</span></label><div class="input-money"><span>$</span><input type="number" id="s-precio" placeholder="0" min="0"></div></div>
-            <div class="fgroup"><label for="s-sena">Seña / Anticipo (ARS $)</label><div class="input-money"><span>$</span><input type="number" id="s-sena" placeholder="0" min="0"></div></div>
+            <div class="fgroup"><label for="s-seña">Seña / Anticipo (ARS $)</label><div class="input-money"><span>$</span><input type="number" id="s-seña" placeholder="0" min="0"></div></div>
             <div class="fgroup span2"><label for="s-forma-pago">Forma de Pago <span class="req">*</span></label>
               <select id="s-forma-pago">
                 <option value="">Seleccionar...</option>
@@ -350,9 +350,9 @@
                 <option value="A convenir entre las partes">A convenir entre las partes</option>
               </select>
             </div>
-            <div class="fgroup"><label for="s-plazo">Plazo de Entrega</label><input type="text" id="s-plazo" placeholder="Ej: 15 dias habiles"></div>
+            <div class="fgroup"><label for="s-plazo">Plazo de Entrega</label><input type="text" id="s-plazo" placeholder="Ej: 15 días hábiles"></div>
             <div class="fgroup"><label for="s-fecha-entrega">Fecha estimada de entrega</label><input type="date" id="s-fecha-entrega"></div>
-            <div class="fgroup span2"><label for="s-garantia">Garantía del servicio</label><input type="text" id="s-garantia" placeholder="Ej: 30 dias de garantia sobre los trabajos realizados"></div>
+            <div class="fgroup span2"><label for="s-garantía">Garantía del servicio</label><input type="text" id="s-garantía" placeholder="Ej: 30 días de garantía sobre los trabajos realizados"></div>
             <div class="fgroup span2"><label for="s-condiciones">Condiciones y observaciones adicionales</label><textarea id="s-condiciones" rows="3" placeholder="Condiciones especiales, excepciones, notas importantes..."></textarea></div>
           </div>
           <div class="step-nav">
@@ -369,7 +369,7 @@
           </div>
 
           <div class="sig-wrap">
-            <div class="sig-owner-label">Firma del Prestador de Servicios — Tobias Ezequiel Obregon</div>
+            <div class="sig-owner-label">Firma del Prestador de Servicios — Tobias Ezequiel Obregón</div>
             <canvas id="sig-servicios" class="sig-canvas"></canvas>
             <button class="btn-clear-sig" onclick="clearSignature('servicios')">🗑 Limpiar firma</button>
           </div>
@@ -449,7 +449,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
 
 </body>
 </html>
