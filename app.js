@@ -1233,7 +1233,7 @@ window.downloadPDFFromDB = async function(id, tipoCopia, numContrato, clienteNom
     const a = document.createElement('a');
     a.href = data[colName];
     const label = tipoCopia === 'cliente' ? 'CLIENTE' : 'NEGOCIO';
-    a.download = Contrato___.pdf;
+    a.download = `Contrato_${numContrato}_${clienteNombre}_${label}.pdf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
