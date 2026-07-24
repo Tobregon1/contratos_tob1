@@ -4,6 +4,13 @@
    ============================================================ */
 
 // ──────────────────────────────────────────────
+// SUPABASE INIT
+// ──────────────────────────────────────────────
+const SUPABASE_URL = 'https://auwyrcnlrzzweamthwxr.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1d3lyY25scnp6d2VhbXRod3hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4Mjc0NzUsImV4cCI6MjEwMDQwMzQ3NX0.7qZpKvGXw6H8I839vxm6yVRK0gG3SwzJkvgMWzucQpk';
+const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+// ──────────────────────────────────────────────
 // STATE
 // ──────────────────────────────────────────────
 const App = {
@@ -45,7 +52,7 @@ function setTodayDates() {
 // ──────────────────────────────────────────────
 // NAVIGATION
 // ──────────────────────────────────────────────
-function navigate(view) {
+async function navigate(view) {
   // Hide all views
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(`view-${view}`).classList.add('active');
@@ -64,7 +71,7 @@ function navigate(view) {
 
   if (view === 'empeño') {
     // Assign contract number for this session
-    App.empeño.contractNum = getNextNum('empeño');
+    App.empeño.contractNum = await getNextNum('empeño');
     App.empeño.numSaved = false;
     App.empeño.step = 1;
     // Reset form steps
@@ -77,7 +84,7 @@ function navigate(view) {
   }
 
   if (view === 'servicios') {
-    App.servicios.contractNum = getNextNum('servicios');
+    App.servicios.contractNum = await getNextNum('servicios');
     App.servicios.numSaved = false;
     App.servicios.step = 1;
     showStep('servicios', 1);
@@ -386,8 +393,23 @@ function g(id) {
 // ──────────────────────────────────────────────
 // NUMBER UTILITIES
 // ──────────────────────────────────────────────
-function getNextNum(type) {
+async function getNextNum(type) {
+  if (!supabaseClient) return parseInt(localStorage.getItem(`${type}_num`) || '0') + 1;
+  try {
+    const { data, error } = await supabaseClient
+      .from('contratos')
+      .select('num_contrato')
+      .eq('tipo', type)
+      .order('created_at', { ascending: false })
+      .limit(1);
+    if (!error && data && data.length > 0) {
+      const match = data[0].num_contrato.match(/\d+/);
+      if (match) return parseInt(match[0]) + 1;
+    }
+  } catch(e) { console.error('Error getting next num', e); }
+  // Fallback
   return parseInt(localStorage.getItem(`${type}_num`) || '0') + 1;
+}_num`) || '0') + 1;
 }
 
 function saveNum(type, num) {
@@ -452,17 +474,25 @@ function numberToWords(n) {
 // ──────────────────────────────────────────────
 // STATS & BADGES
 // ──────────────────────────────────────────────
-function updateStats() {
-  const en = parseInt(localStorage.getItem('empeño_num') || '0');
-  const sn = parseInt(localStorage.getItem('servicios_num') || '0');
+async function updateStats() {
+  let en = 0, sn = 0;
+  if (supabaseClient) {
+    const { count: countE } = await supabaseClient.from('contratos').select('*', { count: 'exact', head: true }).eq('tipo', 'empeño');
+    const { count: countS } = await supabaseClient.from('contratos').select('*', { count: 'exact', head: true }).eq('tipo', 'servicios');
+    en = countE || 0;
+    sn = countS || 0;
+  } else {
+    en = parseInt(localStorage.getItem('empeño_num') || '0');
+    sn = parseInt(localStorage.getItem('servicios_num') || '0');
+  }
   document.getElementById('stat-empeño').textContent   = en;
   document.getElementById('stat-servicios').textContent = sn;
   document.getElementById('stat-total').textContent    = en + sn;
 }
 
-function updateBadges() {
-  const en = getNextNum('empeño');
-  const sn = getNextNum('servicios');
+async function updateBadges() {
+  const en = await getNextNum('empeño');
+  const sn = await getNextNum('servicios');
   document.getElementById('badge-empeño').textContent   = '#' + padNum(en, 3);
   document.getElementById('badge-servicios').textContent = '#' + padNum(sn, 3);
 }
@@ -470,7 +500,17 @@ function updateBadges() {
 // ──────────────────────────────────────────────
 // LOGO MANAGEMENT
 // ──────────────────────────────────────────────
-function loadLogo() {
+async function loadLogo() {
+  if (supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient.from('configuracion').select('valor').eq('clave', 'genesis_logo').single();
+      if (data && data.valor) {
+        App.logo = data.valor;
+        applyLogoToUI(data.valor);
+        return;
+      }
+    } catch(e) { console.error('Error fetching logo', e); }
+  }
   const saved = localStorage.getItem('genesis_logo');
   if (saved) {
     App.logo = saved;
@@ -496,17 +536,27 @@ function handleLogoUpload(event) {
   if (!file) return;
 
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
     const base64 = e.target.result;
     App.logo = base64;
     localStorage.setItem('genesis_logo', base64);
     applyLogoToUI(base64);
     showToast('Logo cargado correctamente ✓', 'success');
+    
+    if (supabaseClient) {
+      try {
+        const { error } = await supabaseClient.from('configuracion').upsert(
+          { clave: 'genesis_logo', valor: base64 },
+          { onConflict: 'clave' }
+        );
+        if (error) console.error('Error saving logo', error);
+      } catch(e) { console.error('Exception saving logo', e); }
+    }
   };
   reader.readAsDataURL(file);
 }
 
-function removeLogo() {
+async function removeLogo() {
   App.logo = null;
   localStorage.removeItem('genesis_logo');
   ['header-logo','home-logo','settings-logo-preview'].forEach(id => {
@@ -520,6 +570,12 @@ function removeLogo() {
   const rb = document.getElementById('btn-remove-logo');
   if (rb) rb.style.display = 'none';
   showToast('Logo quitado', 'success');
+  
+  if (supabaseClient) {
+    try {
+      await supabaseClient.from('configuracion').delete().eq('clave', 'genesis_logo');
+    } catch(e) { console.error('Error deleting logo', e); }
+  }
 }
 
 // ──────────────────────────────────────────────
@@ -1252,9 +1308,6 @@ function showToast(msg, type) {
 
 
 // ─── SUPABASE & HISTORIAL ────────────────────────────────────
-const SUPABASE_URL = 'https://auwyrcnlrzzweamthwxr.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1d3lyY25scnp6d2VhbXRod3hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4Mjc0NzUsImV4cCI6MjEwMDQwMzQ3NX0.7qZpKvGXw6H8I839vxm6yVRK0gG3SwzJkvgMWzucQpk';
-const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 async function saveContractToSupabase(contractData) {
   if (!supabaseClient) return;
