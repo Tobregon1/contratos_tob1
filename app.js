@@ -1159,7 +1159,7 @@ async function loadHistory() {
   try {
     const { data, error } = await supabaseClient
       .from('contratos')
-      .select('*')
+      .select('id, created_at, tipo, num_contrato, cliente_nombre, monto_precio, estado_pago')
       .order('created_at', { ascending: false })
       .limit(50);
       
@@ -1187,13 +1187,8 @@ async function loadHistory() {
         </td>
         <td style="padding:12px 8px;">
 <div style="display:flex; gap:8px;">
-            ${c.pdf_base64 
-              ? `<a href="${c.pdf_base64}" download="Contrato_${c.num_contrato.replace(' ', '')}_${c.cliente_nombre.replace(/\s+/g, '_')}_CLIENTE.pdf" style="text-decoration:none; color:var(--c-purple-l); font-weight:bold; font-size:20px;" title="Original (Cliente)">📄</a>` 
-              : ''}
-            ${c.pdf_base64_copia
-              ? `<a href="${c.pdf_base64_copia}" download="Contrato_${c.num_contrato.replace(' ', '')}_${c.cliente_nombre.replace(/\s+/g, '_')}_NEGOCIO.pdf" style="text-decoration:none; color:var(--c-blue); font-weight:bold; font-size:20px;" title="Copia (Negocio)">📄</a>`
-              : ''}
-            ${!c.pdf_base64 && !c.pdf_base64_copia ? `<span style="color:var(--c-muted); font-size:12px;">N/A</span>` : ''}
+            <button onclick="downloadPDFFromDB('${c.id}', 'cliente', '${c.num_contrato.replace(' ', '')}', '${c.cliente_nombre.replace(/\s+/g, '_')}')" style="background:none; border:none; cursor:pointer; font-size:20px; filter:grayscale(1) brightness(1.2) sepia(1) hue-rotate(90deg) saturate(3);" title="Original (Cliente)">📄</button>
+            <button onclick="downloadPDFFromDB('${c.id}', 'negocio', '${c.num_contrato.replace(' ', '')}', '${c.cliente_nombre.replace(/\s+/g, '_')}')" style="background:none; border:none; cursor:pointer; font-size:20px; filter:grayscale(1) brightness(1.2) sepia(1) hue-rotate(180deg) saturate(3);" title="Copia (Negocio)">📄</button>
           </div>
 </td>
       </tr>
@@ -1201,6 +1196,52 @@ async function loadHistory() {
   } catch (err) {
     console.error('Error cargando historial', err);
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:16px; color:red;">Error al cargar el historial.</td></tr>';
+  }
+}
+
+window.downloadPDFFromDB = async function(id, tipoCopia, numContrato, clienteNombre) {
+  if (!supabaseClient) return;
+  
+  // Show a loading toast or alert
+  const toast = document.createElement('div');
+  toast.innerText = 'Descargando PDF...';
+  toast.style.position = 'fixed';
+  toast.style.bottom = '20px';
+  toast.style.right = '20px';
+  toast.style.background = 'var(--c-primary)';
+  toast.style.color = '#fff';
+  toast.style.padding = '12px 24px';
+  toast.style.borderRadius = '8px';
+  toast.style.zIndex = '9999';
+  document.body.appendChild(toast);
+
+  try {
+    const colName = tipoCopia === 'cliente' ? 'pdf_base64' : 'pdf_base64_copia';
+    const { data, error } = await supabaseClient
+      .from('contratos')
+      .select(colName)
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    if (!data || !data[colName]) {
+      alert('El PDF no está disponible para este contrato.');
+      toast.remove();
+      return;
+    }
+
+    const a = document.createElement('a');
+    a.href = data[colName];
+    const label = tipoCopia === 'cliente' ? 'CLIENTE' : 'NEGOCIO';
+    a.download = Contrato___.pdf;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch (err) {
+    console.error('Error descargando PDF:', err);
+    alert('Hubo un error al intentar descargar el PDF.');
+  } finally {
+    if (toast.parentNode) toast.remove();
   }
 }
 
