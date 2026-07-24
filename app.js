@@ -409,7 +409,6 @@ async function getNextNum(type) {
   } catch(e) { console.error('Error getting next num', e); }
   // Fallback
   return parseInt(localStorage.getItem(`${type}_num`) || '0') + 1;
-}_num`) || '0') + 1;
 }
 
 function saveNum(type, num) {
