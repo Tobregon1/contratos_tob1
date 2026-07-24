@@ -639,337 +639,94 @@ function generatePDF(type, copyType) {
   if (type === 'servicios') generateServiciosPDF(copyType);
 }
 
-function generateEmpeñoPDF(copyType) {
+function createEmpeñoDoc(isCliente) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
 
-  // Save contract number on first generation
+  return doc;
+}
+
+function createEmpeñoDoc(isCliente) {
   if (!App.empeño.numSaved) {
     saveNum('empeño', App.empeño.contractNum);
-    App.empeño.numSaved = true;
-  }
-
-  // Collect data
-  const num    = padNum(App.empeño.contractNum, 4);
-  const nombre = `${g('e-nombre')} ${g('e-apellido')}`;
-  const dni    = g('e-dni');
-  const tel    = g('e-teléfono');
-  const dir    = g('e-dirección');
-  const fecha  = g('e-fecha');
-  const art    = g('e-artículo');
-  const marca  = g('e-marca');
-  const modelo = g('e-modelo');
-  const color  = g('e-color');
-  const estado = g('e-estado');
-  const valor  = parseFloat(g('e-valor')) || 0;
-  const monto  = parseFloat(g('e-monto')) || 0;
-  const tasa   = parseFloat(g('e-tasa')) || 0;
-  const plazo  = parseInt(g('e-plazo')) || 0;
-  const periodo = g('e-periodo') || 'mensual';
-  const obs    = g('e-obs');
-
-  const interés = monto * (tasa / 100);
-  const total   = monto + interés;
-
-  // Vencimiento
-  let vencStr = '—';
-  if (plazo > 0 && fecha) {
-    const base = new Date(fecha + 'T12:00:00');
-    base.setDate(base.getDate() + plazo);
-    vencStr = formatDate(base.toISOString().split('T')[0]);
-  }
-
-  // Signature
-  let sigData = null;
-  if (App.empeño.pad && !App.empeño.pad.isEmpty()) {
-    sigData = App.empeño.pad.toDataURL('image/png');
-  }
-
-  // ── PDF LAYOUT ──
-  const PW = 210, PH = 297, M = 18, CW = PW - M * 2;
-  let y = M;
-
-  // Colors
-  const PURPLE = [123, 47, 190];
-  const DARK   = [20, 20, 35];
-  const GRAY   = [90, 90, 110];
-  const LGRAY  = [180, 180, 195];
-
-  function checkPage(needed = 20) {
-    if (y + needed > PH - 20) {
-      doc.addPage();
-      y = M;
-      addFooter();
-    }
-  }
-
-  function line(x1, y1, x2, y2, color, w) {
-    doc.setDrawColor(...(color || LGRAY));
-    doc.setLineWidth(w || 0.3);
-    doc.line(x1, y1, x2, y2);
-  }
-
-  function addFooter() {
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...LGRAY);
-    doc.text(`Contrato de Empeño N° ${num} — Genesis Informatica — Corrientes Capital, Argentina`, PW / 2, PH - 8, { align: 'center' });
-    line(M, PH - 12, PW - M, PH - 12);
-  }
-
-  // ─── HEADER ───
-  // Logo
-  if (App.logo) {
-    try { doc.addImage(App.logo, 'PNG', M, y, 36, 18, '', 'FAST'); } catch(e) {}
-  }
-
-  // Business info (right side)
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
-  doc.setTextColor(...PURPLE);
-  doc.text('Genesis Informatica', PW - M, y + 6, { align: 'right' });
-  doc.setFontSize(8.5);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(...GRAY);
-  doc.text('Tobias Ezequiel Obregón', PW - M, y + 11, { align: 'right' });
-  doc.text('CUIT: 20-43534626-0', PW - M, y + 15.5, { align: 'right' });
-  doc.text('Corrientes Capital, Argentina', PW - M, y + 20, { align: 'right' });
-
-  y += 26;
-
-  // Divider line with purple gradient effect
-  doc.setFillColor(...PURPLE);
-  doc.rect(M, y, CW, 0.8, 'F');
-  y += 5;
-
-  // Copy type badge
-  const isCliente = copyType === 'cliente';
-  const badgeColor = isCliente ? [34, 197, 94] : [59, 130, 246];
-  const badgeText  = isCliente ? 'ORIGINAL' : 'COPIA';
-  doc.setFillColor(...badgeColor);
-  doc.roundedRect(M, y, 58, 8, 2, 2, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'bold');
-  doc.text(badgeText, M + 29, y + 5.3, { align: 'center' });
-
-  // Contract number (right)
-  doc.setTextColor(...GRAY);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.text(`N° ${num}`, PW - M, y + 5.3, { align: 'right' });
-  y += 14;
-
-  // Contract title
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.setTextColor(...DARK);
-  doc.text(`CONTRATO DE EMPEÑO N° ${num}`, PW / 2, y, { align: 'center' });
-  y += 5;
-  line(M, y, PW - M, y);
-  y += 6;
-
-  // ─── INTRO ───
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(...DARK);
-  const intro = `En la ciudad de Corrientes Capital, Provincia de Corrientes, República Argentina, el día ${formatDate(fecha)}, entre:`;
-  const introLines = doc.splitTextToSize(intro, CW);
-  doc.text(introLines, M, y);
-  y += introLines.length * 5 + 3;
-
-  // Prestamista block
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9.5);
-  doc.setTextColor(...PURPLE);
-  doc.text('PRESTAMISTA:', M, y);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(...DARK);
-  const prestLines = doc.splitTextToSize(
-    `Genesis Informatica, representada por Tobias Ezequiel Obregón, CUIT N° 20-43534626-0, con domicilio en Corrientes Capital, Provincia de Corrientes, Argentina; en adelante denominado "EL PRESTAMISTA";`,
-    CW - 4
-  );
-  doc.setFontSize(9.5);
-  y += 5;
-  doc.text(prestLines, M + 4, y);
-  y += prestLines.length * 5 + 4;
-
-  // Prestatario block
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9.5);
-  doc.setTextColor(...PURPLE);
-  doc.text('PRESTATARIO / CLIENTE:', M, y);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(...DARK);
-  let clientDesc = `${nombre}, DNI N° ${dni}`;
-  if (dir)  clientDesc += `, domiciliado/a en ${dir}`;
-  if (tel)  clientDesc += `, teléfono: ${tel}`;
-  clientDesc += `; en adelante denominado/a "EL CLIENTE";`;
-  const clientLines = doc.splitTextToSize(clientDesc, CW - 4);
-  y += 5;
-  doc.text(clientLines, M + 4, y);
-  y += clientLines.length * 5 + 4;
-
-  const acuerdoLines = doc.splitTextToSize(
-    `Se conviene el presente CONTRATO DE EMPEÑO sujeto a las siguientes cláusulas y condiciones:`, CW
-  );
-  doc.setFontSize(9.5);
-  doc.text(acuerdoLines, M, y);
-  y += acuerdoLines.length * 5 + 5;
-
-  // ─── CLAUSES ───
-  function addClause(number, title, content) {
-    checkPage(30);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9.5);
-    doc.setTextColor(...PURPLE);
-    doc.text(`CLÁUSULA ${number} — ${title}`, M, y);
-    y += 5;
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...DARK);
-    const lines = doc.splitTextToSize(content, CW - 2);
-    doc.text(lines, M + 2, y);
-    y += lines.length * 5 + 4;
-    line(M, y, PW - M, y, LGRAY, 0.2);
-    y += 6;
-  }
-
-  // Clause 1 — Artículo
-  let artDesc = art;
-  if (marca || modelo) artDesc += `. Marca/Modelo: ${[marca, modelo].filter(Boolean).join(' / ')}`;
-  if (color) artDesc += `. Color/Características: ${color}`;
-  addClause('PRIMERA', 'OBJETO DEL CONTRATO',
-    `El CLIENTE entrega voluntariamente al PRESTAMISTA, en calidad de empeño y como garantía del préstamo otorgado, el siguiente bien:\n\n` +
-    `Descripción: ${artDesc}\n` +
-    `Estado del artículo: ${estado || 'A determinar'}\n` +
-    `Valor estimado por el PRESTAMISTA: ${formatCurrency(valor)}\n\n` +
-    `El CLIENTE declara ser el único y legítimo propietario del bien descrito y que el mismo se encuentra libre de todo gravamen, embargo o reclamo de terceros.`
-  );
-
-  addClause('SEGUNDA', 'MONTO DEL PRÉSTAMO',
-    `El PRESTAMISTA otorga al CLIENTE en préstamo la suma de PESOS ${numberToWords(monto)} (${formatCurrency(monto)}), en concepto de préstamo garantizado con el artículo detallado en la Cláusula Primera. El CLIENTE declara haber recibido dicha suma en efectivo/transferencia y en conformidad.`
-  );
-
-  addClause('TERCERA', 'PLAZO',
-    `El presente contrato tiene una vigencia de ${plazo} (${numberToWords(plazo)}) días corridos, contados a partir de la fecha de suscripción, venciendo el día ${vencStr}.`
-  );
-
-  addClause('CUARTA', 'INTERESES Y TOTAL A DEVOLVER',
-    `Se establece una tasa de interés del ${tasa}% ${periodo}. El CLIENTE deberá abonar al PRESTAMISTA, al momento del rescate, la suma total de PESOS ${numberToWords(total)} (${formatCurrency(total)}), correspondiente al capital prestado (${formatCurrency(monto)}) más los intereses acordados (${formatCurrency(interés)}).`
-  );
-
-  addClause('QUINTA', 'RESCATE DEL ARTICULO',
-    `Para recuperar el bien empeñado, el CLIENTE deberá abonar la totalidad del monto indicado en la Cláusula Cuarta (${formatCurrency(total)}) antes del vencimiento establecido el día ${vencStr}. El pago deberá efectuarse en las instalaciones del PRESTAMISTA, en efectivo o por el medio que las partes acuerden en ese momento.`
-  );
-
-  addClause('SEXTA', 'VENCIMIENTO E INCUMPLIMIENTO',
-    `En caso de no producirse el rescate del artículo antes de la fecha de vencimiento establecida, el CLIENTE perderá en forma definitiva e irrevocable el derecho sobre el bien empeñado. El bien quedará en propiedad del PRESTAMISTA sin necesidad de notificación previa, intimación adicional, ni acción judicial alguna. El CLIENTE declara conocer y aceptar expresamente esta condición al momento de la firma del presente contrato.`
-  );
-
-  addClause('SEPTIMA', 'CONDICIONES GENERALES',
-    `El CLIENTE garantiza que el bien entregado en empeño no es producto de delito y que es su legítimo propietario. Las partes renuncian a cualquier fuero que pudiera corresponderles sometiendose a la jurisdicción de los Tribunales Ordinarios de la ciudad de Corrientes, Argentina.` +
-    (obs ? `\n\nOBSERVACIONES: ${obs}` : '')
-  );
-
-  // Conformidad
-  checkPage(15);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9.5);
-  doc.setTextColor(...DARK);
-  const conformLines = doc.splitTextToSize(
-    `CONFORMIDAD: En prueba de conformidad se firman dos (2) ejemplares de un mismo tenor y a un solo efecto, en la ciudad de Corrientes Capital, el día ${formatDate(fecha)}.`,
-    CW
-  );
-  doc.text(conformLines, M, y);
-  y += conformLines.length * 5 + 8;
-
-  // ─── SIGNATURE SECTION ───
-  checkPage(55);
-
-  // Signature boxes
-  const sigBoxW = 78;
-  const leftX   = M;
-  const rightX  = PW - M - sigBoxW;
-
-  // Left box — Cliente
-  doc.setFillColor(248, 248, 252);
-  doc.rect(leftX, y, sigBoxW, 50, 'F');
-  doc.setDrawColor(...LGRAY);
-  doc.setLineWidth(0.3);
-  doc.rect(leftX, y, sigBoxW, 50);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8.5);
-  doc.setTextColor(...PURPLE);
-  doc.text('FIRMA DEL CLIENTE', leftX + sigBoxW / 2, y + 7, { align: 'center' });
-
-  // Signature line
-  line(leftX + 8, y + 32, leftX + sigBoxW - 8, y + 32, LGRAY, 0.5);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(...DARK);
-  doc.text(nombre, leftX + sigBoxW / 2, y + 37, { align: 'center' });
-  doc.text(`DNI: ${dni}`, leftX + sigBoxW / 2, y + 42, { align: 'center' });
-  doc.setTextColor(...GRAY);
-  doc.text('(Firma a mano)', leftX + sigBoxW / 2, y + 47, { align: 'center' });
-
-  // Right box — Prestamista
-  doc.setFillColor(248, 248, 252);
-  doc.rect(rightX, y, sigBoxW, 50, 'F');
-  doc.setDrawColor(...LGRAY);
-  doc.rect(rightX, y, sigBoxW, 50);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8.5);
-  doc.setTextColor(...PURPLE);
-  doc.text('FIRMA DEL PRESTAMISTA', rightX + sigBoxW / 2, y + 7, { align: 'center' });
-
-  if (sigData) {
-    try { doc.addImage(sigData, 'PNG', rightX + 5, y + 9, sigBoxW - 10, 22, '', 'FAST'); } catch(e) {}
-    line(rightX + 8, y + 32, rightX + sigBoxW - 8, y + 32, LGRAY, 0.5);
-  } else {
-    line(rightX + 8, y + 32, rightX + sigBoxW - 8, y + 32, LGRAY, 0.5);
-  }
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(...DARK);
-  doc.text('Tobias Ezequiel Obregón', rightX + sigBoxW / 2, y + 37, { align: 'center' });
-  doc.text('CUIT: 20-43534626-0', rightX + sigBoxW / 2, y + 42, { align: 'center' });
-  doc.text('Genesis Informatica', rightX + sigBoxW / 2, y + 47, { align: 'center' });
-
-  y += 55;
-
-  // Footer on last page
-  addFooter();
-
-  // Save
-  const label = isCliente ? 'CLIENTE' : 'NEGOCIO';
-  const apellido = g('e-apellido').replace(/\s+/g, '_') || 'SinApellido';
-  savePDF(doc, `Empeño_${num}_${apellido}_${label}.pdf`);
-
-  if (copyType === 'cliente') {
+    
+    const docC = createEmpeñoDoc(true);
+    const docN = createEmpeñoDoc(false);
+    
+    const nombre = `${g('e-nombre')} ${g('e-apellido')}`;
+    const num = padNum(App.empeño.contractNum, 4);
+    const art = g('e-artículo');
+    
     saveContractToSupabase({
       tipo: 'empeño',
       num_contrato: `N° ${num}`,
       cliente_nombre: nombre.trim(),
-      cliente_dni: dni,
-      cliente_telefono: tel,
+      cliente_dni: g('e-dni'),
+      cliente_telefono: g('e-teléfono'),
       descripcion: `${art} ${g('e-marca')} ${g('e-modelo')}`.trim(),
       monto_precio: parseFloat(g('e-monto')) || 0,
-      pdf_base64: doc.output('datauristring')
+      pdf_base64: docC.output('datauristring'),
+      pdf_base64_copia: docN.output('datauristring')
     });
+    
+    App.empeño.numSaved = true;
   }
 
+  const doc = createEmpeñoDoc(isCliente);
+  const label = isCliente ? 'CLIENTE' : 'NEGOCIO';
+  const num = padNum(App.empeño.contractNum, 4);
+  const apellido = g('e-apellido').replace(/\s+/g, '_') || 'SinApellido';
+  savePDF(doc, `Empeño_${num}_${apellido}_${label}.pdf`);
+  
   showSuccess('empeño');
   showToast('¡PDF generado correctamente!', 'success');
 }
 
+
+
+function generateEmpeñoPDF(copyType) {
+  const isCliente = copyType === 'cliente';
+
+  if (!App.empeño.numSaved) {
+    saveNum('empeño', App.empeño.contractNum);
+    
+    const docC = createEmpeñoDoc(true);
+    const docN = createEmpeñoDoc(false);
+    
+    const nombre = `${g('e-nombre')} ${g('e-apellido')}`;
+    const num = padNum(App.empeño.contractNum, 4);
+    const art = g('e-artículo');
+    
+    saveContractToSupabase({
+      tipo: 'empeño',
+      num_contrato: `N° ${num}`,
+      cliente_nombre: nombre.trim(),
+      cliente_dni: g('e-dni'),
+      cliente_telefono: g('e-teléfono'),
+      descripcion: `${art} ${g('e-marca')} ${g('e-modelo')}`.trim(),
+      monto_precio: parseFloat(g('e-monto')) || 0,
+      pdf_base64: docC.output('datauristring'),
+      pdf_base64_copia: docN.output('datauristring')
+    });
+    
+    App.empeño.numSaved = true;
+  }
+
+  const doc = createEmpeñoDoc(isCliente);
+  const label = isCliente ? 'CLIENTE' : 'NEGOCIO';
+  const num = padNum(App.empeño.contractNum, 4);
+  const apellido = g('e-apellido').replace(/\s+/g, '_') || 'SinApellido';
+  savePDF(doc, `Empeño_${num}_${apellido}_${label}.pdf`);
+  
+  showSuccess('empeño');
+  showToast('¡PDF generado correctamente!', 'success');
+}
+
+
 // ──────────────────────────────────────────────
 // PDF GENERATION — SERVICIOS
 // ──────────────────────────────────────────────
-function generateServiciosPDF(copyType) {
+function createServiciosDoc(isCliente) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
 
@@ -1053,7 +810,6 @@ function generateServiciosPDF(copyType) {
   doc.rect(M, y, CW, 0.8, 'F');
   y += 5;
 
-  const isCliente = copyType === 'cliente';
   const badgeColor = isCliente ? [34, 197, 94] : [59, 130, 246];
   const badgeText  = isCliente ? 'ORIGINAL' : 'COPIA';
   doc.setFillColor(...badgeColor);
@@ -1306,6 +1062,82 @@ function showToast(msg, type) {
 }
 
 
+
+function createServiciosDoc(isCliente) {
+  if (!App.servicios.numSaved) {
+    saveNum('servicios', App.servicios.contractNum);
+    
+    const docC = createServiciosDoc(true);
+    const docN = createServiciosDoc(false);
+    
+    const num = padNum(App.servicios.contractNum, 4);
+    const nombre = `${g('s-nombre')} ${g('s-apellido')}`;
+    
+    saveContractToSupabase({
+      tipo: 'servicios',
+      num_contrato: `N° ${num}`,
+      cliente_nombre: nombre.trim(),
+      cliente_dni: g('s-dni'),
+      cliente_telefono: g('s-teléfono'),
+      descripcion: `${App.servicios.tipoLabel} - ${g('s-equipo')} ${g('s-marca')}`.trim(),
+      monto_precio: parseFloat(g('s-precio')) || 0,
+      pdf_base64: docC.output('datauristring'),
+      pdf_base64_copia: docN.output('datauristring')
+    });
+    
+    App.servicios.numSaved = true;
+  }
+
+  const doc = createServiciosDoc(isCliente);
+  const label = isCliente ? 'CLIENTE' : 'NEGOCIO';
+  const num = padNum(App.servicios.contractNum, 4);
+  const apellido = g('s-apellido').replace(/\s+/g, '_') || 'SinApellido';
+  savePDF(doc, `Servicio_${num}_${apellido}_${label}.pdf`);
+  
+  showSuccess('servicios');
+  showToast('¡PDF generado correctamente!', 'success');
+}
+
+
+
+function generateServiciosPDF(copyType) {
+  const isCliente = copyType === 'cliente';
+
+  if (!App.servicios.numSaved) {
+    saveNum('servicios', App.servicios.contractNum);
+    
+    const docC = createServiciosDoc(true);
+    const docN = createServiciosDoc(false);
+    
+    const num = padNum(App.servicios.contractNum, 4);
+    const nombre = `${g('s-nombre')} ${g('s-apellido')}`;
+    
+    saveContractToSupabase({
+      tipo: 'servicios',
+      num_contrato: `N° ${num}`,
+      cliente_nombre: nombre.trim(),
+      cliente_dni: g('s-dni'),
+      cliente_telefono: g('s-teléfono'),
+      descripcion: `${App.servicios.tipoLabel} - ${g('s-equipo')} ${g('s-marca')}`.trim(),
+      monto_precio: parseFloat(g('s-precio')) || 0,
+      pdf_base64: docC.output('datauristring'),
+      pdf_base64_copia: docN.output('datauristring')
+    });
+    
+    App.servicios.numSaved = true;
+  }
+
+  const doc = createServiciosDoc(isCliente);
+  const label = isCliente ? 'CLIENTE' : 'NEGOCIO';
+  const num = padNum(App.servicios.contractNum, 4);
+  const apellido = g('s-apellido').replace(/\s+/g, '_') || 'SinApellido';
+  savePDF(doc, `Servicio_${num}_${apellido}_${label}.pdf`);
+  
+  showSuccess('servicios');
+  showToast('¡PDF generado correctamente!', 'success');
+}
+
+
 // ─── SUPABASE & HISTORIAL ────────────────────────────────────
 
 async function saveContractToSupabase(contractData) {
@@ -1354,10 +1186,16 @@ async function loadHistory() {
           </button>
         </td>
         <td style="padding:12px 8px;">
-          ${c.pdf_base64 
-            ? `<a href="${c.pdf_base64}" download="Contrato_${c.num_contrato.replace(' ', '')}_${c.cliente_nombre.replace(/\s+/g, '_')}.pdf" style="text-decoration:none; color:var(--c-purple-l); font-weight:bold; font-size:20px;" title="Descargar PDF">📄</a>` 
-            : `<span style="color:var(--c-muted); font-size:12px;">N/A</span>`}
-        </td>
+<div style="display:flex; gap:8px;">
+            ${c.pdf_base64 
+              ? `<a href="${c.pdf_base64}" download="Contrato_${c.num_contrato.replace(' ', '')}_${c.cliente_nombre.replace(/\s+/g, '_')}_CLIENTE.pdf" style="text-decoration:none; color:var(--c-purple-l); font-weight:bold; font-size:20px;" title="Original (Cliente)">📄</a>` 
+              : ''}
+            ${c.pdf_base64_copia
+              ? `<a href="${c.pdf_base64_copia}" download="Contrato_${c.num_contrato.replace(' ', '')}_${c.cliente_nombre.replace(/\s+/g, '_')}_NEGOCIO.pdf" style="text-decoration:none; color:var(--c-blue); font-weight:bold; font-size:20px;" title="Copia (Negocio)">📄</a>`
+              : ''}
+            ${!c.pdf_base64 && !c.pdf_base64_copia ? `<span style="color:var(--c-muted); font-size:12px;">N/A</span>` : ''}
+          </div>
+</td>
       </tr>
     `).join('');
   } catch (err) {
