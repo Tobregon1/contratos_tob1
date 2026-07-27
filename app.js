@@ -840,16 +840,18 @@ function createEmpeñoDoc(isCliente) {
 function generateEmpeñoPDF(copyType) {
   const isCliente = copyType === 'cliente';
 
+  const doc = createEmpeñoDoc(isCliente);
+  const num = padNum(App.empeño.contractNum, 4);
+  const apellido = g('e-apellido').replace(/\s+/g, '_') || 'SinApellido';
+  const label = isCliente ? 'CLIENTE' : 'NEGOCIO';
+  savePDF(doc, `Empeño_${num}_${apellido}_${label}.pdf`);
+
   if (!App.empeño.numSaved) {
     saveNum('empeño', App.empeño.contractNum);
-    
     const docC = createEmpeñoDoc(true);
     const docN = createEmpeñoDoc(false);
-    
     const nombre = `${g('e-nombre')} ${g('e-apellido')}`;
-    const num = padNum(App.empeño.contractNum, 4);
     const art = g('e-artículo');
-    
     saveContractToSupabase({
       tipo: 'empeño',
       num_contrato: `N° ${num}`,
@@ -861,16 +863,9 @@ function generateEmpeñoPDF(copyType) {
       pdf_base64: docC.output('datauristring'),
       pdf_base64_copia: docN.output('datauristring')
     });
-    
     App.empeño.numSaved = true;
   }
 
-  const doc = createEmpeñoDoc(isCliente);
-  const label = isCliente ? 'CLIENTE' : 'NEGOCIO';
-  const num = padNum(App.empeño.contractNum, 4);
-  const apellido = g('e-apellido').replace(/\s+/g, '_') || 'SinApellido';
-  savePDF(doc, `Empeño_${num}_${apellido}_${label}.pdf`);
-  
   showSuccess('empeño');
   showToast('¡PDF generado correctamente!', 'success');
 }
@@ -1158,29 +1153,7 @@ function createServiciosDoc(isCliente) {
   y += 55;
   addFooter();
 
-  const label = isCliente ? 'CLIENTE' : 'NEGOCIO';
-  const apellido = g('s-apellido').replace(/\s+/g, '_') || 'SinApellido';
-  savePDF(doc, `Servicio_${num}_${apellido}_${label}.pdf`);
-
-  if (copyType === 'cliente') {
-    saveContractToSupabase({
-      tipo: 'servicios',
-      num_contrato: `N° ${num}`,
-      cliente_nombre: nombre.trim(),
-      cliente_dni: dni,
-      cliente_telefono: tel,
-      descripcion: `${tipoServ} - ${desc}`.substring(0, 100),
-      monto_precio: parseFloat(precio) || 0,
-      pdf_base64: doc.output('datauristring')
-    });
-  }
-
-  showSuccess('servicios');
-  showToast('¡PDF generado correctamente!', 'success');
-
-  // Update stats & badges after save
-  updateStats();
-  updateBadges();
+  return doc;
 }
 
 // ──────────────────────────────────────────────
@@ -1223,36 +1196,31 @@ function showToast(msg, type) {
 function generateServiciosPDF(copyType) {
   const isCliente = copyType === 'cliente';
 
+  const doc = createServiciosDoc(isCliente);
+  const num = padNum(App.servicios.contractNum, 4);
+  const apellido = g('s-apellido').replace(/\s+/g, '_') || 'SinApellido';
+  const label = isCliente ? 'CLIENTE' : 'NEGOCIO';
+  savePDF(doc, `Servicio_${num}_${apellido}_${label}.pdf`);
+
   if (!App.servicios.numSaved) {
     saveNum('servicios', App.servicios.contractNum);
-    
     const docC = createServiciosDoc(true);
     const docN = createServiciosDoc(false);
-    
-    const num = padNum(App.servicios.contractNum, 4);
     const nombre = `${g('s-nombre')} ${g('s-apellido')}`;
-    
     saveContractToSupabase({
       tipo: 'servicios',
       num_contrato: `N° ${num}`,
       cliente_nombre: nombre.trim(),
       cliente_dni: g('s-dni'),
       cliente_telefono: g('s-teléfono'),
-      descripcion: `${App.servicios.tipoLabel} - ${g('s-equipo')} ${g('s-marca')}`.trim(),
+      descripcion: `${App.servicios.tipoLabel} - ${g('s-descripcion')}`.substring(0, 100).trim(),
       monto_precio: parseFloat(g('s-precio')) || 0,
       pdf_base64: docC.output('datauristring'),
       pdf_base64_copia: docN.output('datauristring')
     });
-    
     App.servicios.numSaved = true;
   }
 
-  const doc = createServiciosDoc(isCliente);
-  const label = isCliente ? 'CLIENTE' : 'NEGOCIO';
-  const num = padNum(App.servicios.contractNum, 4);
-  const apellido = g('s-apellido').replace(/\s+/g, '_') || 'SinApellido';
-  savePDF(doc, `Servicio_${num}_${apellido}_${label}.pdf`);
-  
   showSuccess('servicios');
   showToast('¡PDF generado correctamente!', 'success');
 }
