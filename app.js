@@ -1268,9 +1268,9 @@ async function loadHistory() {
         <td style="padding:12px 8px;">
           <button onclick="toggleEstadoPago('${c.id}', '${c.estado_pago || 'pendiente'}')" 
                   style="border:none; border-radius:12px; padding:4px 10px; font-size:12px; cursor:pointer; font-weight:bold;
-                         background: ${c.estado_pago === 'pagado' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}; 
-                         color: ${c.estado_pago === 'pagado' ? '#22C55E' : '#EF4444'};">
-            ${c.estado_pago === 'pagado' ? '✅ Pagado' : '❌ Pendiente'}
+                         background: ${c.estado_pago === 'pagado' ? 'rgba(34, 197, 94, 0.2)' : c.estado_pago === 'vencido' ? 'rgba(234, 179, 8, 0.2)' : 'rgba(239, 68, 68, 0.2)'}; 
+                         color: ${c.estado_pago === 'pagado' ? '#22C55E' : c.estado_pago === 'vencido' ? '#EAB308' : '#EF4444'};">
+            ${c.estado_pago === 'pagado' ? '✅ Pagado' : c.estado_pago === 'vencido' ? '⚠️ Vencido' : '❌ Pendiente'}
           </button>
         </td>
         <td style="padding:12px 8px;">
