@@ -1335,7 +1335,11 @@ window.downloadPDFFromDB = async function(id, tipoCopia, numContrato, clienteNom
 
 window.toggleEstadoPago = async function(id, currentEstado) {
   if (!supabaseClient) return;
-  const nuevoEstado = currentEstado === 'pagado' ? 'pendiente' : 'pagado';
+  let nuevoEstado = 'pendiente';
+  if (currentEstado === 'pendiente' || !currentEstado) nuevoEstado = 'pagado';
+  else if (currentEstado === 'pagado') nuevoEstado = 'vencido';
+  else if (currentEstado === 'vencido') nuevoEstado = 'pendiente';
+  
   try {
     const { error } = await supabaseClient.from('contratos').update({ estado_pago: nuevoEstado }).eq('id', id);
     if (error) throw error;
