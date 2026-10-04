@@ -961,8 +961,6 @@ function generateEmpeñoPDF(copyType) {
   const apellido = g('e-apellido').replace(/\s+/g, '_') || 'SinApellido';
   const label = isCliente ? 'CLIENTE' : 'NEGOCIO';
   
-  confirmContract('empeño', false);
-  
   savePDF(doc, `Empeño_${num}_${apellido}_${label}.pdf`);
   showSuccess('empeño');
   showToast('¡PDF descargado!', 'success');
@@ -1292,8 +1290,6 @@ function generateServiciosPDF(copyType) {
   const num = padNum(App.servicios.contractNum, 4);
   const apellido = g('s-apellido').replace(/\s+/g, '_') || 'SinApellido';
   const label = isCliente ? 'CLIENTE' : 'NEGOCIO';
-  
-  confirmContract('servicios', false);
   
   savePDF(doc, `Servicio_${num}_${apellido}_${label}.pdf`);
   showSuccess('servicios');
