@@ -32,6 +32,24 @@ const App = {
 };
 
 // ──────────────────────────────────────────────
+// SESSION TIMEOUT
+// ──────────────────────────────────────────────
+let inactivityTimer;
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+  if (sessionStorage.getItem('logged_in') === 'true') {
+    inactivityTimer = setTimeout(() => {
+      logout();
+      showToast('Sesión cerrada por inactividad', 'error');
+    }, 10 * 60 * 1000);
+  }
+}
+
+['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(evt => {
+  document.addEventListener(evt, resetInactivityTimer, { passive: true });
+});
+
+// ──────────────────────────────────────────────
 // INIT
 // ──────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -40,14 +58,52 @@ document.addEventListener('DOMContentLoaded', () => {
   updateStats();
   updateBadges();
 
+  const eDni = document.getElementById('e-dni');
+  if (eDni) eDni.addEventListener('blur', () => autocompleteClient('e-dni', 'e'));
+  
+  const sDni = document.getElementById('s-dni');
+  if (sDni) sDni.addEventListener('blur', () => autocompleteClient('s-dni', 's'));
+
   if (sessionStorage.getItem('logged_in') === 'true') {
     document.getElementById('app-header').style.display = 'block';
     navigate('home');
+    resetInactivityTimer();
   } else {
     document.getElementById('app-header').style.display = 'none';
     navigate('login');
   }
 });
+
+// ──────────────────────────────────────────────
+// CLIENT AUTOCOMPLETE
+// ──────────────────────────────────────────────
+async function autocompleteClient(dniId, formPrefix) {
+  const dniStr = document.getElementById(dniId).value.trim();
+  if (!dniStr || !supabaseClient) return;
+  
+  try {
+    const { data, error } = await supabaseClient
+      .from('contratos')
+      .select('cliente_nombre, cliente_telefono')
+      .eq('cliente_dni', dniStr)
+      .limit(1);
+      
+    if (data && data.length > 0) {
+      const client = data[0];
+      if(client.cliente_nombre) {
+        const parts = client.cliente_nombre.split(' ');
+        document.getElementById(`${formPrefix}-nombre`).value = parts[0] || '';
+        document.getElementById(`${formPrefix}-apellido`).value = parts.slice(1).join(' ') || '';
+      }
+      if(client.cliente_telefono && document.getElementById(`${formPrefix}-teléfono`)) {
+        document.getElementById(`${formPrefix}-teléfono`).value = client.cliente_telefono;
+      }
+      showToast('Cliente autocompletado', 'success');
+    }
+  } catch(e) {
+    console.error('Error buscando cliente:', e);
+  }
+}
 
 async function doLogin() {
   const u = document.getElementById('login-user').value.trim();
@@ -73,7 +129,7 @@ async function doLogin() {
         console.error('Error consultando Supabase:', error);
         shakeField('login-user');
         shakeField('login-pass');
-        showToast('Error de DB: ' + error.message, 'error');
+        showToast('Usuario o contraseña incorrectos', 'error');
         return;
       }
         
@@ -84,6 +140,7 @@ async function doLogin() {
         document.getElementById('login-pass').value = '';
         navigate('home');
         showToast('Sesión iniciada', 'success');
+        resetInactivityTimer();
         return;
       }
     } catch(err) {
@@ -120,6 +177,18 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// Theme logic
+function toggleTheme() {
+  document.body.classList.toggle('light-theme');
+  const isLight = document.body.classList.contains('light-theme');
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+}
+
+// Apply theme on load
+if (localStorage.getItem('theme') === 'light') {
+  document.body.classList.add('light-theme');
+}
+
 
 function setTodayDates() {
   const today = new Date().toISOString().split('T')[0];
@@ -151,6 +220,11 @@ async function navigate(view) {
     App.servicios.numSaved = false;
     updateStats();
     updateBadges();
+    return;
+  }
+  
+  if (view === 'historial') {
+    loadHistory();
     return;
   }
 
@@ -778,7 +852,7 @@ function createEmpeñoDoc(isCliente) {
   const PW = 210, PH = 297, M = 18, CW = PW - M * 2;
   let y = M;
 
-  const PURPLE = [123, 47, 190];
+  const GOLDEN = [212, 175, 55];
   const DARK   = [20, 20, 35];
   const GRAY   = [90, 90, 110];
   const LGRAY  = [180, 180, 195];
@@ -800,14 +874,14 @@ function createEmpeñoDoc(isCliente) {
 
   // ─── HEADER ───
   if (App.logo) { try { doc.addImage(App.logo, 'PNG', M, y, 36, 18, '', 'FAST'); } catch(e) {} }
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(...PURPLE);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(...GOLDEN);
   doc.text('Genesis Informatica', PW - M, y + 6, { align: 'right' });
   doc.setFontSize(8.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(...GRAY);
   doc.text('Tobias Ezequiel Obregón', PW - M, y + 11, { align: 'right' });
   doc.text('CUIT: 20-43534626-0', PW - M, y + 15.5, { align: 'right' });
   doc.text('Corrientes Capital, Argentina', PW - M, y + 20, { align: 'right' });
   y += 26;
-  doc.setFillColor(...PURPLE); doc.rect(M, y, CW, 0.8, 'F'); y += 5;
+  doc.setFillColor(...GOLDEN); doc.rect(M, y, CW, 0.8, 'F'); y += 5;
 
   const badgeColor = isCliente ? [34, 197, 94] : [59, 130, 246];
   const badgeText  = isCliente ? 'ORIGINAL' : 'COPIA';
@@ -828,7 +902,7 @@ function createEmpeñoDoc(isCliente) {
   const introLines = doc.splitTextToSize(intro, CW);
   doc.text(introLines, M, y); y += introLines.length * 5 + 3;
 
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...PURPLE);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...GOLDEN);
   doc.text('PRESTAMISTA:', M, y);
   doc.setFont('helvetica', 'normal'); doc.setTextColor(...DARK);
   const prestLines = doc.splitTextToSize(
@@ -837,7 +911,7 @@ function createEmpeñoDoc(isCliente) {
   );
   y += 5; doc.text(prestLines, M + 4, y); y += prestLines.length * 5 + 4;
 
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...PURPLE);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...GOLDEN);
   doc.text('DEUDOR / EMPEÑANTE:', M, y);
   doc.setFont('helvetica', 'normal'); doc.setTextColor(...DARK);
   let clientDesc = `${nombre}, DNI N° ${dni}`;
@@ -853,7 +927,7 @@ function createEmpeñoDoc(isCliente) {
   // ─── CLAUSES ───
   function addClause(number, title, content) {
     checkPage(30);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...PURPLE);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...GOLDEN);
     doc.text(`CLÁUSULA ${number} — ${title}`, M, y); y += 5;
     doc.setFont('helvetica', 'normal'); doc.setTextColor(...DARK);
     const lines = doc.splitTextToSize(content, CW - 2);
@@ -908,7 +982,7 @@ function createEmpeñoDoc(isCliente) {
 
   doc.setFillColor(248, 248, 252); doc.rect(leftX, y, sigBoxW, 50, 'F');
   doc.setDrawColor(...LGRAY); doc.setLineWidth(0.3); doc.rect(leftX, y, sigBoxW, 50);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...PURPLE);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...GOLDEN);
   doc.text('FIRMA DEL CLIENTE', leftX + sigBoxW / 2, y + 7, { align: 'center' });
   line(leftX + 8, y + 32, leftX + sigBoxW - 8, y + 32, LGRAY, 0.5);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...DARK);
@@ -918,7 +992,7 @@ function createEmpeñoDoc(isCliente) {
 
   doc.setFillColor(248, 248, 252); doc.rect(rightX, y, sigBoxW, 50, 'F');
   doc.setDrawColor(...LGRAY); doc.rect(rightX, y, sigBoxW, 50);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...PURPLE);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...GOLDEN);
   doc.text('FIRMA DEL PRESTAMISTA', rightX + sigBoxW / 2, y + 7, { align: 'center' });
   if (sigData) {
     try { doc.addImage(sigData, 'PNG', rightX + 5, y + 9, sigBoxW - 10, 22, '', 'FAST'); } catch(e) {}
@@ -939,35 +1013,16 @@ function createEmpeñoDoc(isCliente) {
 
 function generateEmpeñoPDF(copyType) {
   const isCliente = copyType === 'cliente';
-
   const doc = createEmpeñoDoc(isCliente);
   const num = padNum(App.empeño.contractNum, 4);
   const apellido = g('e-apellido').replace(/\s+/g, '_') || 'SinApellido';
   const label = isCliente ? 'CLIENTE' : 'NEGOCIO';
+  
+  confirmContract('empeño', false);
+  
   savePDF(doc, `Empeño_${num}_${apellido}_${label}.pdf`);
-
-  if (!App.empeño.numSaved) {
-    saveNum('empeño', App.empeño.contractNum);
-    const docC = createEmpeñoDoc(true);
-    const docN = createEmpeñoDoc(false);
-    const nombre = `${g('e-nombre')} ${g('e-apellido')}`;
-    const art = g('e-artículo');
-    saveContractToSupabase({
-      tipo: 'empeño',
-      num_contrato: `N° ${num}`,
-      cliente_nombre: nombre.trim(),
-      cliente_dni: g('e-dni'),
-      cliente_telefono: g('e-teléfono'),
-      descripcion: `${art} ${g('e-marca')} ${g('e-modelo')}`.trim(),
-      monto_precio: parseFloat(g('e-monto')) || 0,
-      pdf_base64: docC.output('datauristring'),
-      pdf_base64_copia: docN.output('datauristring')
-    });
-    App.empeño.numSaved = true;
-  }
-
   showSuccess('empeño');
-  showToast('¡PDF generado correctamente!', 'success');
+  showToast('¡PDF descargado!', 'success');
 }
 
 
@@ -977,11 +1032,6 @@ function generateEmpeñoPDF(copyType) {
 function createServiciosDoc(isCliente) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-
-  if (!App.servicios.numSaved) {
-    saveNum('servicios', App.servicios.contractNum);
-    App.servicios.numSaved = true;
-  }
 
   const num    = padNum(App.servicios.contractNum, 4);
   const nombre = `${g('s-nombre')} ${g('s-apellido')}`;
@@ -1010,7 +1060,7 @@ function createServiciosDoc(isCliente) {
   const PW = 210, PH = 297, M = 18, CW = PW - M * 2;
   let y = M;
 
-  const PURPLE = [123, 47, 190];
+  const GOLDEN = [212, 175, 55];
   const DARK   = [20, 20, 35];
   const GRAY   = [90, 90, 110];
   const LGRAY  = [180, 180, 195];
@@ -1044,7 +1094,7 @@ function createServiciosDoc(isCliente) {
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(13);
-  doc.setTextColor(...PURPLE);
+  doc.setTextColor(...GOLDEN);
   doc.text('Genesis Informatica', PW - M, y + 6, { align: 'right' });
   doc.setFontSize(8.5);
   doc.setFont('helvetica', 'normal');
@@ -1054,7 +1104,7 @@ function createServiciosDoc(isCliente) {
   doc.text('Corrientes Capital, Argentina', PW - M, y + 20, { align: 'right' });
 
   y += 26;
-  doc.setFillColor(...PURPLE);
+  doc.setFillColor(...GOLDEN);
   doc.rect(M, y, CW, 0.8, 'F');
   y += 5;
 
@@ -1079,7 +1129,7 @@ function createServiciosDoc(isCliente) {
   doc.text(`CONTRATO DE PRESTACIÓN DE SERVICIOS N° ${num}`, PW / 2, y, { align: 'center' });
   y += 3;
   doc.setFontSize(10);
-  doc.setTextColor(...PURPLE);
+  doc.setTextColor(...GOLDEN);
   doc.text(`— ${tipo} —`, PW / 2, y + 5, { align: 'center' });
   y += 9;
   line(M, y, PW - M, y);
@@ -1097,7 +1147,7 @@ function createServiciosDoc(isCliente) {
   // Prestador block
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9.5);
-  doc.setTextColor(...PURPLE);
+  doc.setTextColor(...GOLDEN);
   doc.text('PRESTADOR DE SERVICIOS:', M, y);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...DARK);
@@ -1113,7 +1163,7 @@ function createServiciosDoc(isCliente) {
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9.5);
-  doc.setTextColor(...PURPLE);
+  doc.setTextColor(...GOLDEN);
   doc.text('CLIENTE / COMITENTE:', M, y);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...DARK);
@@ -1136,7 +1186,7 @@ function createServiciosDoc(isCliente) {
     checkPage(30);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9.5);
-    doc.setTextColor(...PURPLE);
+    doc.setTextColor(...GOLDEN);
     doc.text(`CLÁUSULA ${number} — ${title}`, M, y);
     y += 5;
     doc.setFont('helvetica', 'normal');
@@ -1214,7 +1264,7 @@ function createServiciosDoc(isCliente) {
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.5);
-  doc.setTextColor(...PURPLE);
+  doc.setTextColor(...GOLDEN);
   doc.text('FIRMA DEL CLIENTE', leftX + sigBoxW / 2, y + 7, { align: 'center' });
   line(leftX + 8, y + 32, leftX + sigBoxW - 8, y + 32, LGRAY, 0.5);
   doc.setFont('helvetica', 'normal');
@@ -1233,7 +1283,7 @@ function createServiciosDoc(isCliente) {
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.5);
-  doc.setTextColor(...PURPLE);
+  doc.setTextColor(...GOLDEN);
   doc.text('FIRMA DEL PRESTADOR', rightX + sigBoxW / 2, y + 7, { align: 'center' });
 
   if (sigData) {
@@ -1295,34 +1345,79 @@ function showToast(msg, type) {
 
 function generateServiciosPDF(copyType) {
   const isCliente = copyType === 'cliente';
-
   const doc = createServiciosDoc(isCliente);
   const num = padNum(App.servicios.contractNum, 4);
   const apellido = g('s-apellido').replace(/\s+/g, '_') || 'SinApellido';
   const label = isCliente ? 'CLIENTE' : 'NEGOCIO';
+  
+  confirmContract('servicios', false);
+  
   savePDF(doc, `Servicio_${num}_${apellido}_${label}.pdf`);
-
-  if (!App.servicios.numSaved) {
-    saveNum('servicios', App.servicios.contractNum);
-    const docC = createServiciosDoc(true);
-    const docN = createServiciosDoc(false);
-    const nombre = `${g('s-nombre')} ${g('s-apellido')}`;
-    saveContractToSupabase({
-      tipo: 'servicios',
-      num_contrato: `N° ${num}`,
-      cliente_nombre: nombre.trim(),
-      cliente_dni: g('s-dni'),
-      cliente_telefono: g('s-teléfono'),
-      descripcion: `${App.servicios.tipoLabel} - ${g('s-descripcion')}`.substring(0, 100).trim(),
-      monto_precio: parseFloat(g('s-precio')) || 0,
-      pdf_base64: docC.output('datauristring'),
-      pdf_base64_copia: docN.output('datauristring')
-    });
-    App.servicios.numSaved = true;
-  }
-
   showSuccess('servicios');
-  showToast('¡PDF generado correctamente!', 'success');
+  showToast('¡PDF descargado!', 'success');
+}
+
+function confirmContract(type, showToasts = true) {
+  if (type === 'empeño') {
+    if (!App.empeño.numSaved) {
+      saveNum('empeño', App.empeño.contractNum);
+      const docC = createEmpeñoDoc(true);
+      const docN = createEmpeñoDoc(false);
+      const nombre = `${g('e-nombre')} ${g('e-apellido')}`;
+      const art = g('e-artículo');
+      const num = padNum(App.empeño.contractNum, 4);
+      saveContractToSupabase({
+        tipo: 'empeño',
+        num_contrato: `N° ${num}`,
+        cliente_nombre: nombre.trim(),
+        cliente_dni: g('e-dni'),
+        cliente_telefono: g('e-teléfono'),
+        descripcion: `${art} ${g('e-marca')} ${g('e-modelo')}`.trim(),
+        monto_precio: parseFloat(g('e-monto')) || 0,
+        pdf_base64: docC.output('datauristring'),
+        pdf_base64_copia: docN.output('datauristring')
+      });
+      App.empeño.numSaved = true;
+      if (showToasts) {
+        showSuccess('empeño');
+        showToast('¡Contrato guardado exitosamente!', 'success');
+      }
+    } else {
+      if (showToasts) {
+        showSuccess('empeño');
+        showToast('El contrato ya estaba guardado', 'success');
+      }
+    }
+  } else if (type === 'servicios') {
+    if (!App.servicios.numSaved) {
+      saveNum('servicios', App.servicios.contractNum);
+      const docC = createServiciosDoc(true);
+      const docN = createServiciosDoc(false);
+      const nombre = `${g('s-nombre')} ${g('s-apellido')}`;
+      const num = padNum(App.servicios.contractNum, 4);
+      saveContractToSupabase({
+        tipo: 'servicios',
+        num_contrato: `N° ${num}`,
+        cliente_nombre: nombre.trim(),
+        cliente_dni: g('s-dni'),
+        cliente_telefono: g('s-teléfono'),
+        descripcion: `${App.servicios.tipoLabel} - ${g('s-descripcion')}`.substring(0, 100).trim(),
+        monto_precio: parseFloat(g('s-precio')) || 0,
+        pdf_base64: docC.output('datauristring'),
+        pdf_base64_copia: docN.output('datauristring')
+      });
+      App.servicios.numSaved = true;
+      if (showToasts) {
+        showSuccess('servicios');
+        showToast('¡Contrato guardado exitosamente!', 'success');
+      }
+    } else {
+      if (showToasts) {
+        showSuccess('servicios');
+        showToast('El contrato ya estaba guardado', 'success');
+      }
+    }
+  }
 }
 
 
@@ -1524,4 +1619,117 @@ function shareWhatsApp(type) {
   const encodedMsg = encodeURIComponent(msg);
   const url = `https://wa.me/${tel}?text=${encodedMsg}`;
   window.open(url, '_blank');
+}
+
+// ──────────────────────────────────────────────
+// HISTORIAL & CHART
+// ──────────────────────────────────────────────
+function getStateColor(state) {
+  if (state === 'pagado') return 'var(--c-success)';
+  if (state === 'vencido') return 'var(--c-danger)';
+  if (state === 'cancelado') return 'var(--c-muted)';
+  return 'var(--c-warning)';
+}
+
+async function loadHistory() {
+  const tbody = document.getElementById('historial-tbody');
+  if (!tbody || !supabaseClient) return;
+  
+  tbody.innerHTML = '<tr><td colspan="7" style="padding:16px; text-align:center;">Cargando...</td></tr>';
+  
+  try {
+    const { data, error } = await supabaseClient.from('contratos').select('*').order('created_at', { ascending: false }).limit(50);
+    if (error) throw error;
+    
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="padding:16px; text-align:center;">No hay contratos guardados.</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = '';
+    data.forEach(c => {
+      const safeName = (c.cliente_nombre || 'SinNombre').replace(/\s+/g, '_');
+      const safeNum = (c.num_contrato || '').replace(' ', '');
+      
+      const row = document.createElement('tr');
+      row.style.borderBottom = '1px solid var(--c-border)';
+      row.innerHTML = `
+        <td style="padding:12px 10px; vertical-align:middle;">${new Date(c.created_at).toLocaleDateString()}</td>
+        <td style="padding:12px 10px; vertical-align:middle;">
+          <span style="background:${c.tipo === 'empeño' ? 'var(--c-primary)' : 'var(--c-secondary)'}; color:#fff; padding:4px 8px; border-radius:12px; font-size:12px; font-weight:600;">
+            ${c.tipo.toUpperCase()}
+          </span>
+        </td>
+        <td style="padding:12px 10px; vertical-align:middle;"><b>${c.num_contrato || ''}</b></td>
+        <td style="padding:12px 10px; vertical-align:middle; line-height:1.4;">${c.cliente_nombre || ''}<br><small style="color:var(--c-muted)">DNI: ${c.cliente_dni || ''}</small></td>
+        <td style="padding:12px 10px; vertical-align:middle;"><b>$${c.monto_precio || '0'}</b></td>
+        <td style="padding:12px 10px; vertical-align:middle; text-align:center;">
+          <select onchange="updateContractState(${c.id}, this)" style="padding:6px; font-size:12px; border-radius:12px; font-weight:600; border:none; background:${getStateColor(c.estado_pago)}; color:#fff; cursor:pointer; outline:none; text-align:center; appearance:none; -webkit-appearance:none;">
+            <option value="pendiente" style="background:var(--c-surf); color:var(--c-text); font-weight:normal;" ${c.estado_pago === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+            <option value="pagado" style="background:var(--c-surf); color:var(--c-text); font-weight:normal;" ${c.estado_pago === 'pagado' ? 'selected' : ''}>Pagado</option>
+            <option value="vencido" style="background:var(--c-surf); color:var(--c-text); font-weight:normal;" ${c.estado_pago === 'vencido' ? 'selected' : ''}>Vencido</option>
+            <option value="cancelado" style="background:var(--c-surf); color:var(--c-text); font-weight:normal;" ${c.estado_pago === 'cancelado' ? 'selected' : ''}>Cancelado</option>
+          </select>
+        </td>
+        <td style="padding:12px 10px; vertical-align:middle; text-align:center;">
+          <div style="display:flex; gap:6px; justify-content:center;">
+            <button class="btn-outline" style="padding:6px 8px; font-size:14px;" onclick="downloadBase64PDF('${c.pdf_base64}', 'Contrato_${safeNum}_${safeName}_CLIENTE.pdf')" title="Original">📄</button>
+            ${c.pdf_base64_copia ? `<button class="btn-outline" style="padding:6px 8px; font-size:14px;" onclick="downloadBase64PDF('${c.pdf_base64_copia}', 'Contrato_${safeNum}_${safeName}_NEGOCIO.pdf')" title="Copia">📑</button>` : ''}
+          </div>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+  } catch(e) {
+    console.error('Error cargando historial:', e);
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:16px; text-align:center; color:var(--c-danger);">Error al cargar historial. Verifica RLS.</td></tr>';
+  }
+}
+
+function filterHistory() {
+  const searchInput = document.getElementById('historial-search');
+  if (!searchInput) return;
+  const filter = searchInput.value.toLowerCase();
+  const tbody = document.getElementById('historial-tbody');
+  const rows = tbody.getElementsByTagName('tr');
+
+  for (let i = 0; i < rows.length; i++) {
+    const tdClient = rows[i].getElementsByTagName('td')[3];
+    const tdNum = rows[i].getElementsByTagName('td')[2];
+    if (tdClient || tdNum) {
+      const txtValue = (tdClient ? tdClient.textContent : '') + ' ' + (tdNum ? tdNum.textContent : '');
+      if (txtValue.toLowerCase().indexOf(filter) > -1) {
+        rows[i].style.display = "";
+      } else {
+        rows[i].style.display = "none";
+      }
+    }
+  }
+}
+
+async function updateContractState(id, selectEl) {
+  if (!supabaseClient) return;
+  const nuevoEstado = selectEl.value;
+  try {
+    const { error } = await supabaseClient.from('contratos').update({ estado_pago: nuevoEstado }).eq('id', id);
+    if (error) throw error;
+    showToast('Estado actualizado', 'success');
+    selectEl.style.background = getStateColor(nuevoEstado);
+  } catch(e) {
+    console.error('Error al actualizar estado:', e);
+    showToast('Error al actualizar', 'error');
+  }
+}
+
+function downloadBase64PDF(base64Str, filename) {
+  if (!base64Str) {
+    showToast('PDF no disponible', 'error');
+    return;
+  }
+  const link = document.createElement('a');
+  link.href = base64Str;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }

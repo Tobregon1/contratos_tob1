@@ -23,6 +23,7 @@
       <div class="header-actions">
         <!-- Desktop Buttons -->
         <div class="desktop-only">
+          <button class="hdr-btn-text" onclick="toggleTheme()" title="Cambiar Tema">🌞 / 🌙</button>
           <button class="hdr-btn-text" onclick="navigate('historial')">Historial</button>
           <button class="hdr-btn-text" onclick="openSettings()">Configuración</button>
           <button class="hdr-btn-text text-danger" onclick="logout()">Cerrar sesión</button>
@@ -34,6 +35,7 @@
 
       <!-- Mobile Menu -->
       <div class="mobile-menu" id="mobile-menu">
+        <button class="mob-menu-btn" onclick="toggleTheme(); toggleMobileMenu()">🌞 / 🌙 Tema</button>
         <button class="mob-menu-btn" onclick="navigate('historial'); toggleMobileMenu()">Historial</button>
         <button class="mob-menu-btn" onclick="openSettings(); toggleMobileMenu()">Configuración</button>
         <button class="mob-menu-btn text-danger" onclick="logout(); toggleMobileMenu()">Cerrar sesión</button>
@@ -155,13 +157,12 @@
             <div class="stat-lbl">Total contratos</div>
           </div>
         </div>
-
       </div>
     </section>
 
     <!-- ═══ HISTORIAL VIEW ═══ -->
     <section id="view-historial" class="view">
-      <div class="form-container">
+      <div class="form-container" style="max-width:1000px;">
         <div class="form-topbar">
           <button class="back-btn" onclick="navigate('home')">← Inicio</button>
           <div class="form-title-wrap">
@@ -171,29 +172,32 @@
         </div>
         
         <div class="fstep active" style="margin-top:20px;">
-          <div class="step-hdr" style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="step-hdr" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
             <div>
               <h3>📋 Registros Guardados</h3>
               <p>Contratos sincronizados en la nube</p>
             </div>
-            <button class="btn-primary" style="padding:8px 16px; font-size:14px;" onclick="loadHistory()">🔄 Actualizar</button>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="historial-search" placeholder="🔍 Buscar DNI o Nombre..." onkeyup="filterHistory()" style="padding:8px 12px; font-size:14px; width:220px;">
+              <button class="btn-primary" style="padding:8px 16px; font-size:14px;" onclick="loadHistory()">🔄 Actualizar</button>
+            </div>
           </div>
           
           <div style="overflow-x:auto;">
             <table style="width:100%; border-collapse:collapse; text-align:left; font-size:14px;">
               <thead>
                 <tr style="border-bottom:2px solid var(--c-border); color:var(--c-muted);">
-                  <th style="padding:12px 8px;">Fecha</th>
-                  <th style="padding:12px 8px;">Tipo</th>
-                  <th style="padding:12px 8px;">N°</th>
-                  <th style="padding:12px 8px;">Cliente</th>
-                  <th style="padding:12px 8px;">Monto / Precio</th>
-                  <th style="padding:12px 8px;">Estado</th>
-                  <th style="padding:12px 8px;">PDF</th>
+                  <th style="padding:12px 10px;">Fecha</th>
+                  <th style="padding:12px 10px;">Tipo</th>
+                  <th style="padding:12px 10px;">N°</th>
+                  <th style="padding:12px 10px;">Cliente</th>
+                  <th style="padding:12px 10px;">Monto / Precio</th>
+                  <th style="padding:12px 10px; text-align:center;">Estado</th>
+                  <th style="padding:12px 10px; text-align:center;">PDF</th>
                 </tr>
               </thead>
               <tbody id="historial-tbody">
-                <tr><td colspan="7" style="padding:16px; text-align:center; color:var(--c-muted);">Cargando historial...</td></tr>
+                <tr><td colspan="7" style="padding:24px; text-align:center; color:var(--c-muted);">Cargando historial...</td></tr>
               </tbody>
             </table>
           </div>
@@ -320,22 +324,25 @@
             <div class="preview-grid" id="empeño-preview-content"></div>
           </div>
 
-          <div class="step-nav gen-nav">
-            <button class="btn-outline" onclick="prevStep('empeño',4)">← Anterior</button>
-            <div class="gen-group">
-              <button class="btn-gen btn-gen-client" onclick="generatePDF('empeño','cliente')">
-                <span class="gen-ico">📄</span>
-                <div><div class="gen-lbl">PDF para el Cliente</div><div class="gen-sub">Copia ORIGINAL</div></div>
-              </button>
-              <button class="btn-gen btn-gen-copy" onclick="generatePDF('empeño','copia')">
-                <span class="gen-ico">📋</span>
-                <div><div class="gen-lbl">Mi Copia</div><div class="gen-sub">Copia del NEGOCIO</div></div>
-              </button>
+            <div class="step-nav gen-nav">
+              <button class="btn-outline" onclick="prevStep('empeño',4)">← Anterior</button>
+              <div style="display:flex; justify-content:center; width:100%; margin-top:10px;">
+                <button class="btn-primary" onclick="confirmContract('empeño')" style="width:100%; max-width:420px; font-size:16px; font-weight:600; padding:16px; border:none; border-radius:12px; cursor:pointer;">💾 Guardar y Confirmar Contrato</button>
+              </div>
+              <div class="gen-group" style="margin-top:15px;">
+                <button class="btn-gen btn-gen-client" onclick="generatePDF('empeño','cliente')">
+                  <span class="gen-ico">📄</span>
+                  <div><div class="gen-lbl">PDF para el Cliente</div><div class="gen-sub">Descargar ORIGINAL</div></div>
+                </button>
+                <button class="btn-gen btn-gen-copy" onclick="generatePDF('empeño','copia')">
+                  <span class="gen-ico">📋</span>
+                  <div><div class="gen-lbl">Mi Copia</div><div class="gen-sub">Descargar NEGOCIO</div></div>
+                </button>
+              </div>
+              <div style="display:flex; justify-content:center; margin-top:15px; width:100%;">
+                <button class="btn-success" onclick="shareWhatsApp('empeño')" style="width:100%; max-width:420px; font-size:16px; font-weight:600; padding:16px; border:none; border-radius:12px; cursor:pointer; color:white; background:#25D366;">💬 Enviar Resumen por WhatsApp</button>
+              </div>
             </div>
-            <div style="display:flex; justify-content:center; margin-top:15px; width:100%;">
-              <button class="btn-success" onclick="shareWhatsApp('empeño')" style="width:100%; max-width:420px; font-size:16px; font-weight:600; padding:16px; border:none; border-radius:12px; cursor:pointer; color:white; background:#25D366;">💬 Enviar Resumen por WhatsApp</button>
-            </div>
-          </div>
 
           <div class="success-bar" id="empeño-success" style="display:none">
             <span>✅</span>
@@ -475,22 +482,25 @@
             <div class="preview-grid" id="servicios-preview-content"></div>
           </div>
 
-          <div class="step-nav gen-nav">
-            <button class="btn-outline" onclick="prevStep('servicios',4)">← Anterior</button>
-            <div class="gen-group">
-              <button class="btn-gen btn-gen-client" onclick="generatePDF('servicios','cliente')">
-                <span class="gen-ico">📄</span>
-                <div><div class="gen-lbl">PDF para el Cliente</div><div class="gen-sub">Copia ORIGINAL</div></div>
-              </button>
-              <button class="btn-gen btn-gen-copy" onclick="generatePDF('servicios','copia')">
-                <span class="gen-ico">📋</span>
-                <div><div class="gen-lbl">Mi Copia</div><div class="gen-sub">Copia del NEGOCIO</div></div>
-              </button>
+            <div class="step-nav gen-nav">
+              <button class="btn-outline" onclick="prevStep('servicios',4)">← Anterior</button>
+              <div style="display:flex; justify-content:center; width:100%; margin-top:10px;">
+                <button class="btn-primary" onclick="confirmContract('servicios')" style="width:100%; max-width:420px; font-size:16px; font-weight:600; padding:16px; border:none; border-radius:12px; cursor:pointer;">💾 Guardar y Confirmar Contrato</button>
+              </div>
+              <div class="gen-group" style="margin-top:15px;">
+                <button class="btn-gen btn-gen-client" onclick="generatePDF('servicios','cliente')">
+                  <span class="gen-ico">📄</span>
+                  <div><div class="gen-lbl">PDF para el Cliente</div><div class="gen-sub">Descargar ORIGINAL</div></div>
+                </button>
+                <button class="btn-gen btn-gen-copy" onclick="generatePDF('servicios','copia')">
+                  <span class="gen-ico">📋</span>
+                  <div><div class="gen-lbl">Mi Copia</div><div class="gen-sub">Descargar NEGOCIO</div></div>
+                </button>
+              </div>
+              <div style="display:flex; justify-content:center; margin-top:15px; width:100%;">
+                <button class="btn-success" onclick="shareWhatsApp('servicios')" style="width:100%; max-width:420px; font-size:16px; font-weight:600; padding:16px; border:none; border-radius:12px; cursor:pointer; color:white; background:#25D366;">💬 Enviar Resumen por WhatsApp</button>
+              </div>
             </div>
-            <div style="display:flex; justify-content:center; margin-top:15px; width:100%;">
-              <button class="btn-success" onclick="shareWhatsApp('servicios')" style="width:100%; max-width:420px; font-size:16px; font-weight:600; padding:16px; border:none; border-radius:12px; cursor:pointer; color:white; background:#25D366;">💬 Enviar Resumen por WhatsApp</button>
-            </div>
-          </div>
 
           <div class="success-bar" id="servicios-success" style="display:none">
             <span>✅</span>
@@ -549,7 +559,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-  <script src="app.js?v=13"></script>
+  <script src="app.js"></script>
 
 </body>
 </html>
