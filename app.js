@@ -580,9 +580,17 @@ async function removeLogo() {
 // ──────────────────────────────────────────────
 // SETTINGS MODAL
 // ──────────────────────────────────────────────
-function openSettings() {
-  const en = parseInt(localStorage.getItem('empeño_num') || '0');
-  const sn = parseInt(localStorage.getItem('servicios_num') || '0');
+async function openSettings() {
+  let en = 0, sn = 0;
+  if (supabaseClient) {
+    const { count: countE } = await supabaseClient.from('contratos').select('*', { count: 'exact', head: true }).eq('tipo', 'empeño');
+    const { count: countS } = await supabaseClient.from('contratos').select('*', { count: 'exact', head: true }).eq('tipo', 'servicios');
+    en = countE || 0;
+    sn = countS || 0;
+  } else {
+    en = parseInt(localStorage.getItem('empeño_num') || '0');
+    sn = parseInt(localStorage.getItem('servicios_num') || '0');
+  }
   document.getElementById('cfg-empeño-cnt').textContent   = en;
   document.getElementById('cfg-servicios-cnt').textContent = sn;
 
