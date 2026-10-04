@@ -69,6 +69,14 @@ async function doLogin() {
         .eq('password', p)
         .single();
         
+      if (error) {
+        console.error('Error consultando Supabase:', error);
+        shakeField('login-user');
+        shakeField('login-pass');
+        showToast('Error de DB: ' + error.message, 'error');
+        return;
+      }
+        
       if (data) {
         sessionStorage.setItem('logged_in', 'true');
         document.getElementById('app-header').style.display = 'block';
