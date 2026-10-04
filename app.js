@@ -39,7 +39,79 @@ document.addEventListener('DOMContentLoaded', () => {
   loadLogo();
   updateStats();
   updateBadges();
+
+  if (sessionStorage.getItem('logged_in') === 'true') {
+    document.getElementById('app-header').style.display = 'block';
+    navigate('home');
+  } else {
+    document.getElementById('app-header').style.display = 'none';
+    navigate('login');
+  }
 });
+
+async function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value.trim();
+  
+  if (!u || !p) {
+    shakeField('login-user');
+    shakeField('login-pass');
+    showToast('Ingresá usuario y contraseña', 'error');
+    return;
+  }
+  
+  if (supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient
+        .from('usuarios')
+        .select('*')
+        .eq('usuarios', u)
+        .eq('password', p)
+        .single();
+        
+      if (data) {
+        sessionStorage.setItem('logged_in', 'true');
+        document.getElementById('app-header').style.display = 'block';
+        document.getElementById('login-user').value = '';
+        document.getElementById('login-pass').value = '';
+        navigate('home');
+        showToast('Sesión iniciada', 'success');
+        return;
+      }
+    } catch(err) {
+      console.error('Error de login o usuario no encontrado:', err);
+    }
+  }
+
+  shakeField('login-user');
+  shakeField('login-pass');
+  showToast('Usuario o contraseña incorrectos', 'error');
+}
+
+function logout() {
+  sessionStorage.removeItem('logged_in');
+  document.getElementById('app-header').style.display = 'none';
+  navigate('login');
+}
+
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobile-menu');
+  if (menu) {
+    menu.classList.toggle('active');
+  }
+}
+
+// Close mobile menu if clicked outside
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('mobile-menu');
+  const btn = document.querySelector('.mobile-only');
+  if (menu && menu.classList.contains('active')) {
+    if (!menu.contains(e.target) && !btn.contains(e.target)) {
+      menu.classList.remove('active');
+    }
+  }
+});
+
 
 function setTodayDates() {
   const today = new Date().toISOString().split('T')[0];
@@ -57,6 +129,11 @@ async function navigate(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(`view-${view}`).classList.add('active');
   window.scrollTo(0, 0);
+
+  if (view === 'login') {
+    document.getElementById('app-header').style.display = 'none';
+    return;
+  }
 
   if (view === 'home') {
     // Reset sessions when returning home
@@ -518,11 +595,14 @@ async function loadLogo() {
 }
 
 function applyLogoToUI(base64) {
-  const ids = ['home-logo', 'settings-logo-preview'];
+  const ids = ['home-logo', 'settings-logo-preview', 'login-logo'];
   ids.forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.src = base64; el.style.display = ''; }
   });
+
+  const txt = document.getElementById('login-logo-text');
+  if (txt) txt.style.display = 'none';
 
   const ph = document.getElementById('settings-logo-ph');
   if (ph) ph.style.display = 'none';
@@ -558,10 +638,14 @@ function handleLogoUpload(event) {
 async function removeLogo() {
   App.logo = null;
   localStorage.removeItem('genesis_logo');
-  ['header-logo','home-logo','settings-logo-preview'].forEach(id => {
+  ['header-logo','home-logo','settings-logo-preview','login-logo'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.src = ''; el.style.display = 'none'; }
   });
+  
+  const txt = document.getElementById('login-logo-text');
+  if (txt) txt.style.display = 'flex';
+  
   const hlt = document.getElementById('hlt');
   if (hlt) hlt.style.display = 'flex';
   const ph = document.getElementById('settings-logo-ph');

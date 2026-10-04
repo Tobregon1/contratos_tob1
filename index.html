@@ -12,7 +12,7 @@
 <body>
 
   <!-- App Header -->
-  <header id="app-header">
+  <header id="app-header" style="display:none;">
     <div class="header-inner">
         <div class="header-brand" onclick="navigate('home')">
           <div class="header-brand-text">
@@ -21,16 +21,68 @@
           </div>
         </div>
       <div class="header-actions">
-        <button class="hdr-btn" onclick="navigate('historial')" title="Historial de Contratos">📋</button>
-        <button class="hdr-btn" onclick="openSettings()" title="Configuración">⚙</button>
+        <!-- Desktop Buttons -->
+        <div class="desktop-only">
+          <button class="hdr-btn-text" onclick="navigate('historial')">Historial</button>
+          <button class="hdr-btn-text" onclick="openSettings()">Configuración</button>
+          <button class="hdr-btn-text text-danger" onclick="logout()">Cerrar sesión</button>
+        </div>
+        
+        <!-- Mobile Toggle -->
+        <button class="hdr-btn mobile-only" onclick="toggleMobileMenu()" title="Menú">☰</button>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div class="mobile-menu" id="mobile-menu">
+        <button class="mob-menu-btn" onclick="navigate('historial'); toggleMobileMenu()">Historial</button>
+        <button class="mob-menu-btn" onclick="openSettings(); toggleMobileMenu()">Configuración</button>
+        <button class="mob-menu-btn text-danger" onclick="logout(); toggleMobileMenu()">Cerrar sesión</button>
       </div>
     </div>
   </header>
 
   <main id="app-main">
 
+    <!-- ═══ LOGIN VIEW ═══ -->
+    <section id="view-login" class="view active">
+      <div style="display:flex; justify-content:center; align-items:center; min-height:100vh; padding:20px;">
+        <div class="ctype-card" style="max-width:420px; width:100%; padding:48px 32px; text-align:center; background:var(--c-surf); box-shadow:var(--shadow-lg);">
+          
+          <div class="hero-logo-area" style="margin-bottom:24px; min-height:80px; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+            <img id="login-logo" class="hero-logo" src="" alt="Logo" style="display:none; max-height:80px;">
+            <div id="login-logo-text" style="display:flex; flex-direction:column; align-items:center;">
+               <span class="brand-name" style="font-size:26px;">Genesis Informatica</span>
+               <span class="brand-tag" style="font-size:14px; margin-top:4px;">Contratos Digitales</span>
+            </div>
+          </div>
+          
+          <p class="hero-sub" style="margin-bottom:32px; font-size:15px;">Ingresá tus credenciales para continuar</p>
+          
+          <div class="fgrid" style="grid-template-columns: 1fr; text-align:left; gap:20px; margin-bottom:0;">
+            <div class="fgroup">
+              <label for="login-user">Usuario</label>
+              <div style="position:relative;">
+                <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:16px; color:var(--c-dim); pointer-events:none;">👤</span>
+                <input type="text" id="login-user" placeholder="Usuario" onkeydown="if(event.key === 'Enter') doLogin()" style="padding-left:42px;">
+              </div>
+            </div>
+            <div class="fgroup">
+              <label for="login-pass">Contraseña</label>
+              <div style="position:relative;">
+                <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:16px; color:var(--c-dim); pointer-events:none;">🔒</span>
+                <input type="password" id="login-pass" placeholder="Contraseña" onkeydown="if(event.key === 'Enter') doLogin()" style="padding-left:42px;">
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary" style="width:100%; margin-top:32px; font-size:16px; padding:14px; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="doLogin()">
+            <span>Ingresar</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
     <!-- ═══ HOME VIEW ═══ -->
-    <section id="view-home" class="view active">
+    <section id="view-home" class="view">
       <div class="home-wrap">
 
         <div class="home-hero">

@@ -103,7 +103,7 @@ body {
 .brand-name { font-size: 17px; font-weight: 700; color: var(--c-text); line-height: 1.2; }
 .brand-tag { font-size: 11px; color: var(--c-purple-l); font-weight: 500; letter-spacing: 0.5px; }
 
-.header-actions { display: flex; gap: 8px; }
+.header-actions { display: flex; gap: 8px; align-items: center; }
 .hdr-btn {
   background: var(--c-surf2); border: 1px solid var(--c-border);
   color: var(--c-muted); width: 38px; height: 38px;
@@ -111,6 +111,39 @@ body {
   transition: all 0.2s; display: flex; align-items: center; justify-content: center;
 }
 .hdr-btn:hover { background: var(--c-surf3); color: var(--c-text); border-color: var(--c-border2); }
+
+.hdr-btn-text {
+  background: transparent; border: none;
+  color: var(--c-muted); padding: 8px 12px;
+  border-radius: var(--r-sm); cursor: pointer; font-size: 14px; font-weight: 600;
+  transition: all 0.2s; font-family: inherit;
+}
+.hdr-btn-text:hover { background: var(--c-surf2); color: var(--c-text); }
+.text-danger { color: var(--c-danger) !important; }
+.text-danger:hover { background: rgba(239,68,68,0.1) !important; }
+
+.mobile-only { display: none; }
+.desktop-only { display: flex; gap: 8px; }
+
+.mobile-menu {
+  position: fixed; top: 73px; right: 24px;
+  background: var(--c-surf2); border: 1px solid var(--c-border);
+  border-radius: var(--r-md); padding: 12px;
+  display: flex; flex-direction: column; gap: 8px;
+  box-shadow: var(--shadow-lg); z-index: 99;
+  opacity: 0; transform: translateY(-10px); pointer-events: none;
+  transition: all 0.2s ease;
+}
+.mobile-menu.active {
+  opacity: 1; transform: translateY(0); pointer-events: auto;
+}
+.mob-menu-btn {
+  background: transparent; border: none; text-align: left;
+  color: var(--c-text); padding: 12px 16px; width: 200px;
+  border-radius: var(--r-sm); cursor: pointer; font-size: 15px; font-weight: 600;
+  transition: background 0.2s; font-family: inherit;
+}
+.mob-menu-btn:hover { background: var(--c-surf3); }
 
 /* ─── MAIN / VIEWS ───────────────────────────── */
 #app-main { min-height: calc(100vh - 73px); }
@@ -309,6 +342,7 @@ label {
 .req { color: var(--c-purple-l); }
 
 input[type="text"],
+input[type="password"],
 input[type="number"],
 input[type="tel"],
 input[type="email"],
@@ -607,6 +641,9 @@ input[type="date"] { color-scheme: dark; }
 @media (max-width: 560px) {
   .header-inner { padding: 10px 16px; }
   .brand-name { font-size: 15px; }
+  .desktop-only { display: none; }
+  .mobile-only { display: flex; }
+  .mobile-menu { right: 16px; top: 60px; }
   .home-wrap { padding: 32px 16px 48px; }
   .form-container { padding: 20px 16px 48px; }
   .form-topbar { flex-wrap: wrap; justify-content: center; }
