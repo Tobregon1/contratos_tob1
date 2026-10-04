@@ -679,81 +679,21 @@ async function loadLogo() {
 
 function updateUILogo() {
   const isLight = document.body.classList.contains('light-theme');
-  const base64 = App.logo;
   const uiLogoSrc = isLight ? 'assets/logo-light.png' : 'assets/logo-dark.png';
   
   const ids = ['home-logo', 'login-logo'];
   ids.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
-      if (uiLogoSrc) {
-        el.src = uiLogoSrc;
-        el.style.display = '';
-      } else {
-        el.style.display = 'none';
-      }
+      el.src = uiLogoSrc;
+      el.style.display = '';
     }
   });
-
-  const txt = document.getElementById('login-logo-text');
-  if (txt) txt.style.display = uiLogoSrc ? 'none' : 'flex';
-
-  const previewEl = document.getElementById('settings-logo-preview');
-  if (previewEl) {
-    if (base64) {
-      previewEl.src = base64;
-      previewEl.style.display = '';
-    } else {
-      previewEl.style.display = 'none';
-    }
-  }
-
-  const ph = document.getElementById('settings-logo-ph');
-  if (ph) ph.style.display = base64 ? 'none' : 'block';
-  const removeBtn = document.getElementById('btn-remove-logo');
-  if (removeBtn) removeBtn.style.display = base64 ? '' : 'none';
 }
 
 function applyLogoToUI(base64) {
   App.logo = base64;
   updateUILogo();
-}
-
-function handleLogoUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const base64 = e.target.result;
-    App.logo = base64;
-    localStorage.setItem('genesis_logo', base64);
-    applyLogoToUI(base64);
-    showToast('Logo cargado correctamente ✓', 'success');
-    
-    if (supabaseClient) {
-      try {
-        const { error } = await supabaseClient.from('configuracion').upsert(
-          { clave: 'genesis_logo', valor: base64 },
-          { onConflict: 'clave' }
-        );
-        if (error) console.error('Error saving logo', error);
-      } catch(e) { console.error('Exception saving logo', e); }
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-async function removeLogo() {
-  App.logo = null;
-  localStorage.removeItem('genesis_logo');
-  if (supabaseClient) {
-    try {
-      await supabaseClient.from('configuracion').delete().eq('clave', 'genesis_logo');
-    } catch(e) { console.error('Error deleting logo', e); }
-  }
-  updateUILogo();
-  showToast('Logo quitado', 'success');
 }
 
 // ──────────────────────────────────────────────
@@ -772,16 +712,6 @@ async function openSettings() {
   }
   document.getElementById('cfg-empeño-cnt').textContent   = en;
   document.getElementById('cfg-servicios-cnt').textContent = sn;
-
-  // Refresh logo preview in modal
-  if (App.logo) {
-    const prev = document.getElementById('settings-logo-preview');
-    if (prev) { prev.src = App.logo; prev.style.display = ''; }
-    const ph = document.getElementById('settings-logo-ph');
-    if (ph) ph.style.display = 'none';
-    const rb = document.getElementById('btn-remove-logo');
-    if (rb) rb.style.display = '';
-  }
 
   document.getElementById('modal-settings').style.display = 'flex';
 }
