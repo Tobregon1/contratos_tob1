@@ -183,8 +183,10 @@ body {
 
 .home-hero { text-align: center; margin-bottom: 48px; }
 
-.hero-logo-area { margin-bottom: 20px; min-height: 60px; display: flex; justify-content: center; }
-.hero-logo { max-height: 80px; max-width: 320px; object-fit: contain; filter: drop-shadow(0 4px 16px rgba(123,47,190,0.4)); }
+.hero-logo-area { margin-bottom: 20px; min-height: 140px; display: flex; justify-content: center; align-items: center; }
+.hero-logo { max-height: 140px; max-width: 400px; object-fit: contain; mix-blend-mode: screen; }
+
+body.light-theme .hero-logo { mix-blend-mode: multiply; }
 
 .hero-title {
   font-size: clamp(32px, 5vw, 52px);
@@ -676,5 +678,21 @@ input[type="date"] { color-scheme: dark; }
   border-color: #ef4444 !important;
   background-color: #fef2f2 !important;
 }
-b o d y . l i g h t - t h e m e   {   - - c - b g :   # F 8 F A F C ;   - - c - s u r f :   # F F F F F F ;   - - c - s u r f 2 :   # F 1 F 5 F 9 ;   - - c - s u r f 3 :   # E 2 E 8 F 0 ;   - - c - t e x t :   # 0 F 1 7 2 A ;   - - c - m u t e d :   # 4 7 5 5 6 9 ;   - - c - d i m :   # 9 4 A 3 B 8 ;   - - c - b o r d e r :   r g b a ( 0 , 0 , 0 , 0 . 1 ) ;   - - c - b o r d e r 2 :   r g b a ( 0 , 0 , 0 , 0 . 2 ) ;   - - c - p r i m a r y :   # B 8 9 6 2 C ;   - - c - p r i m a r y - l :   # D 4 A F 3 7 ;   - - c - p r i m a r y - d :   # 8 F 7 2 1 A ;   - - c - s e c o n d a r y :   # 0 2 8 4 C 7 ;   - - c - s e c o n d a r y - g :   r g b a ( 2 ,   1 3 2 ,   1 9 9 ,   0 . 2 5 ) ;   - - c - p r i m a r y - b g :   r g b a ( 1 8 4 , 1 5 0 , 4 4 , 0 . 1 ) ;   - - c - p r i m a r y - g :   r g b a ( 1 8 4 , 1 5 0 , 4 4 , 0 . 2 ) ;   }  
- 
+body.light-theme {
+  --c-bg: #F8FAFC;
+  --c-surf: #FFFFFF;
+  --c-surf2: #F1F5F9;
+  --c-surf3: #E2E8F0;
+  --c-text: #0F172A;
+  --c-muted: #475569;
+  --c-dim: #94A3B8;
+  --c-border: rgba(0, 0, 0, 0.1);
+  --c-border2: rgba(0, 0, 0, 0.2);
+  --c-primary: #B8962C;
+  --c-primary-l: #D4AF37;
+  --c-primary-d: #8F721A;
+  --c-secondary: #0284C7;
+  --c-secondary-g: rgba(2, 132, 199, 0.25);
+  --c-primary-bg: rgba(184, 150, 44, 0.1);
+  --c-primary-g: rgba(184, 150, 44, 0.2);
+}

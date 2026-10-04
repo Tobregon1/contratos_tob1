@@ -182,6 +182,7 @@ function toggleTheme() {
   document.body.classList.toggle('light-theme');
   const isLight = document.body.classList.contains('light-theme');
   localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  if (typeof updateUILogo === 'function') updateUILogo();
 }
 
 // Apply theme on load
@@ -664,7 +665,7 @@ async function loadLogo() {
       const { data, error } = await supabaseClient.from('configuracion').select('valor').eq('clave', 'genesis_logo').single();
       if (data && data.valor) {
         App.logo = data.valor;
-        applyLogoToUI(data.valor);
+        updateUILogo();
         return;
       }
     } catch(e) { console.error('Error fetching logo', e); }
@@ -672,24 +673,50 @@ async function loadLogo() {
   const saved = localStorage.getItem('genesis_logo');
   if (saved) {
     App.logo = saved;
-    applyLogoToUI(saved);
   }
+  updateUILogo();
 }
 
-function applyLogoToUI(base64) {
-  const ids = ['home-logo', 'settings-logo-preview', 'login-logo'];
+function updateUILogo() {
+  const isLight = document.body.classList.contains('light-theme');
+  const base64 = App.logo;
+  const uiLogoSrc = isLight ? 'assets/logo-light.png' : 'assets/logo-dark.png';
+  
+  const ids = ['home-logo', 'login-logo'];
   ids.forEach(id => {
     const el = document.getElementById(id);
-    if (el) { el.src = base64; el.style.display = ''; }
+    if (el) {
+      if (uiLogoSrc) {
+        el.src = uiLogoSrc;
+        el.style.display = '';
+      } else {
+        el.style.display = 'none';
+      }
+    }
   });
 
   const txt = document.getElementById('login-logo-text');
-  if (txt) txt.style.display = 'none';
+  if (txt) txt.style.display = uiLogoSrc ? 'none' : 'flex';
+
+  const previewEl = document.getElementById('settings-logo-preview');
+  if (previewEl) {
+    if (base64) {
+      previewEl.src = base64;
+      previewEl.style.display = '';
+    } else {
+      previewEl.style.display = 'none';
+    }
+  }
 
   const ph = document.getElementById('settings-logo-ph');
-  if (ph) ph.style.display = 'none';
+  if (ph) ph.style.display = base64 ? 'none' : 'block';
   const removeBtn = document.getElementById('btn-remove-logo');
-  if (removeBtn) removeBtn.style.display = '';
+  if (removeBtn) removeBtn.style.display = base64 ? '' : 'none';
+}
+
+function applyLogoToUI(base64) {
+  App.logo = base64;
+  updateUILogo();
 }
 
 function handleLogoUpload(event) {
@@ -720,27 +747,13 @@ function handleLogoUpload(event) {
 async function removeLogo() {
   App.logo = null;
   localStorage.removeItem('genesis_logo');
-  ['header-logo','home-logo','settings-logo-preview','login-logo'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.src = ''; el.style.display = 'none'; }
-  });
-  
-  const txt = document.getElementById('login-logo-text');
-  if (txt) txt.style.display = 'flex';
-  
-  const hlt = document.getElementById('hlt');
-  if (hlt) hlt.style.display = 'flex';
-  const ph = document.getElementById('settings-logo-ph');
-  if (ph) ph.style.display = '';
-  const rb = document.getElementById('btn-remove-logo');
-  if (rb) rb.style.display = 'none';
-  showToast('Logo quitado', 'success');
-  
   if (supabaseClient) {
     try {
       await supabaseClient.from('configuracion').delete().eq('clave', 'genesis_logo');
     } catch(e) { console.error('Error deleting logo', e); }
   }
+  updateUILogo();
+  showToast('Logo quitado', 'success');
 }
 
 // ──────────────────────────────────────────────
