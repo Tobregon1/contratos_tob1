@@ -1528,7 +1528,7 @@ function shareWhatsApp(type) {
     
     msg = `Hola ${nombre}, te adjuntamos el resumen de tu *Contrato de Empeño ${num}*.\n\n`
         + `*Artículo:* ${articulo}\n`
-        + `*Monto prestado:* $${monto}\n`
+        + `*Monto prestado:* ${formatCurrency(monto)}\n`
         + `*Total a devolver:* ${total}\n\n`
         + `¡Gracias por confiar en Genesis Informatica!`;
   } else if (type === 'servicios') {
@@ -1540,7 +1540,7 @@ function shareWhatsApp(type) {
     
     msg = `Hola ${nombre}, te adjuntamos el resumen de tu *Contrato de Servicios ${num}*.\n\n`
         + `*Servicio:* ${servicio}\n`
-        + `*Precio Total:* $${precio}\n\n`
+        + `*Precio Total:* ${formatCurrency(precio)}\n\n`
         + `¡Gracias por confiar en Genesis Informatica!`;
   }
   
