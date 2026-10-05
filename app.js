@@ -1601,7 +1601,7 @@ async function loadHistory() {
         </td>
         <td style="padding:12px 10px; vertical-align:middle;"><b>${c.num_contrato || ''}</b></td>
         <td style="padding:12px 10px; vertical-align:middle; line-height:1.4;">${c.cliente_nombre || ''}<br><small style="color:var(--c-muted)">DNI: ${c.cliente_dni || ''}</small></td>
-        <td style="padding:12px 10px; vertical-align:middle;"><b>$${c.monto_precio || '0'}</b></td>
+        <td style="padding:12px 10px; vertical-align:middle;"><b>${formatCurrency(c.monto_precio || 0)}</b></td>
         <td style="padding:12px 10px; vertical-align:middle; text-align:center;">
           <select onchange="updateContractState(${c.id}, this)" style="padding:6px; font-size:12px; border-radius:12px; font-weight:600; border:none; background:${getStateColor(c.estado_pago)}; color:#fff; cursor:pointer; outline:none; text-align:center; appearance:none; -webkit-appearance:none;">
             <option value="pendiente" style="background:var(--c-surf); color:var(--c-text); font-weight:normal;" ${c.estado_pago === 'pendiente' ? 'selected' : ''}>Pendiente</option>
